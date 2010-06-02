@@ -6,8 +6,11 @@ import re
 import copy
 import math
 import random
+"""for openCV ;)"""
+import cv
+from opencv.cv import *
+from opencv.highgui import *
 """from some_class import *"""
-
 class preprocessing:
 	def __init__(self):
 		dirImages   = ""
@@ -16,6 +19,11 @@ class preprocessing:
 	"""_________________________________________________________________"""
 	"""does the scaling of all the images that it reads from a direcotry"""
 	def scale(self):
+		cvStartWindowThread()
+   		cvNamedWindow("win")
+   		im = cvLoadImage("building.jpg")
+   		cvShowImage("win", im)
+		cvWaitKey()
 		print "Nothing -- scale ;)"
 	"""_________________________________________________________________"""
 	"""centers the hands in the images"""
@@ -23,4 +31,4 @@ class preprocessing:
 		print "Nothing -- center ;)"
 """_________________________________________________________________________"""
 pre = preprocessing()
-pre.center()
+pre.scale()
