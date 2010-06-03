@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
     parser = OptionParser(usage = "usage: %prog [options] [filename|camera_index]")
 #    parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = "C:\OpenCV2.1\data\haarcascades/haarcascade_frontalface_alt.xml")
-    parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = "..\..\data\haarcascades\haarcascade_frontalface_alt.xml")
+    parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = "..\haarcascades\haarcascade_frontalface_alt.xml")
     (options, args) = parser.parse_args()
 
     print options.cascade
