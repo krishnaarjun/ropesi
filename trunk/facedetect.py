@@ -29,6 +29,7 @@ global H
 global S
 
 H=S=0
+hasColor =0
 
 class getHistValues: # not used right now
     def __init__(self,img,roi=None):
@@ -54,7 +55,7 @@ class getHistValues: # not used right now
         return values;
 
 class getSkinColor:
-    def __init__(self,img):
+    def __init__(self,img,hasColor):
 
         cascade = cv.Load("haarcascades\haarcascade_frontalface_alt.xml")
 
@@ -78,8 +79,8 @@ class getSkinColor:
         if faces:
             for ((x, y, w, h), n) in faces:
 
-                print "(x, y, w, h) = (%d, %d, %d, %d)" % (x, y, w, h)
-                print "width is %d and height is %d" % (img.width, img.height)
+##                print "(x, y, w, h) = (%d, %d, %d, %d)" % (x, y, w, h)
+##                print "width is %d and height is %d" % (img.width, img.height)
 
                 faceX = x
                 faceY = y
@@ -96,7 +97,6 @@ class getSkinColor:
                 pt1 = (int(x), int(y))
                 pt2 = (int((x + w)), int((y + h)))
                 cv.Rectangle(img, pt1, pt2, cv.RGB(255, 0, 0), 3, 8, 0)
-
 
         cv.ShowImage("result", img)
         
@@ -123,14 +123,14 @@ class getSkinColor:
         maxi=0
         mini=1000
 
-        global H
-        global S
-        H = S = 0
+        #local hue and saturation
+        Hl = Sl = 0
+        
         for x in range(0, hueFace.height):
             for y in range(0, hueFace.width):
-                H = H + hueFace[x,y]
-                S = S + satFace[x,y]
-#                V = V + valFace[x,y]
+                Hl = Hl + hueFace[x,y]
+                Sl = Sl + satFace[x,y]
+#                Vl = Vl + valFace[x,y]
                 if hueFace[x,y]>maxi:
                     maxi=hueFace[x,y]
                 if hueFace[x,y]<mini:
@@ -138,10 +138,17 @@ class getSkinColor:
                     
 
             numPixels = hueFace.height * hueFace.width
-            H = H/numPixels
-            S = S/numPixels
+            Hl = Hl/numPixels
+            Sl = Sl/numPixels
 #            V = V/numPixels
-            print "skin color (H, S) = (%f, %f)" % (H,S)
+#            print "skin color (H, S) = (%f, %f)" % (Hl,Sl)
+
+        if not hasColor:
+            global H
+            global S
+            H = Hl
+            S = Sl
+        
 
 
 class detect_and_draw:
@@ -150,8 +157,11 @@ class detect_and_draw:
         small_img = cv.CreateImage((cv.Round(img.width / image_scale),cv.Round(img.height / image_scale)), 8, 3)
         cv.Resize(img, small_img, cv.CV_INTER_LINEAR)
 
+        global hasColor
+
         if H==0 and S ==0:
-            getSkinColor(small_img)
+            hasColor=1
+        getSkinColor(small_img, hasColor)
 
         imgHSV = cv.CreateImage(cv.GetSize(small_img), 8, 3)
         cv.CvtColor(small_img, imgHSV, cv.CV_BGR2HSV);
@@ -193,11 +203,9 @@ class detect_and_draw:
 if __name__ == '__main__':
 
     parser = OptionParser(usage = "usage: %prog [options] [filename|camera_index]")
-    parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = "haarcascades\haarcascade_frontalface_alt.xml")
+#    parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = "haarcascades\haarcascade_frontalface_alt.xml")
     (options, args) = parser.parse_args()
 
-#    cascade = cv.Load(options.cascade)
-    
     if len(args) != 1:
         parser.print_help()
         sys.exit(1)
@@ -216,9 +224,12 @@ if __name__ == '__main__':
     cv.NamedWindow("hueTrshldEr", cv.CV_WINDOW_AUTOSIZE)
     cv.NamedWindow("hueTrshldDi", cv.CV_WINDOW_AUTOSIZE)
 
+    frameCount=0
+    totalTime=0
     if capture:
         frame_copy = None
         while True:
+            frameCount+=1
             t = cv.GetTickCount() #start timer
             frame = cv.QueryFrame(capture)
             if not frame:
@@ -238,7 +249,10 @@ if __name__ == '__main__':
                 break
             #stop timer and show elapsed time
             t = cv.GetTickCount() - t
-            print "detection time = %gms" % (t/(cv.GetTickFrequency()*1000.))
+            totalTime += t/(cv.GetTickFrequency()*1000.)
+##            print "detection time = %gms" % (t/(cv.GetTickFrequency()*1000.))
+            if frameCount%10==0:
+                print "after %i frames the average time = %gms" % (frameCount, totalTime/frameCount)
     else:
         image = cv.LoadImage(input_name, 1)
         detect_and_draw(image, cascade)
