@@ -105,14 +105,79 @@ class detect_and_draw:
 
         faceHSV = cv.CreateImage(cv.GetSize(face), 8, 3)
         cv.CvtColor(face, faceHSV, cv.CV_BGR2HSV);
+        imgHSV = cv.CreateImage(cv.GetSize(img), 8, 3)
+        cv.CvtColor(img, imgHSV, cv.CV_BGR2HSV);
 
-        print getHistValues(faceHSV)
+        hsv = cv.CreateImage(cv.GetSize(img),img.depth,img.nChannels);
+        cv.CvtColor(face, faceHSV, cv.CV_BGR2HSV);
+
+        hueFace = cv.CreateMat(face.height, face.width, cv.CV_8UC1)
+        satFace = cv.CreateMat(face.height, face.width, cv.CV_8UC1)
+        valFace = cv.CreateMat(face.height, face.width, cv.CV_8UC1)
+        cv.Split(faceHSV, hueFace, satFace, valFace, None)
+
+        cv.ShowImage("hue", hueFace)
+
+        hueImg = cv.CreateMat(img.height, img.width, cv.CV_8UC1)
+        satImg = cv.CreateMat(img.height, img.width, cv.CV_8UC1)
+        valImg = cv.CreateMat(img.height, img.width, cv.CV_8UC1)
+        cv.Split(imgHSV, hueImg, satImg, valImg, None)
+
+        cv.ShowImage("hueImg", hueImg)
+
+        #intitialize value to store average Hue value
+        H = 0
+        S = 0
+        V = 0
+        maxi=0
+        mini=1000
+        for x in range(0, hueFace.height):
+            for y in range(0, hueFace.width):
+                H = H + hueFace[x,y]
+                S = S + satFace[x,y]
+                V = V + valFace[x,y]
+                if hueFace[x,y]>maxi:
+                    maxi=hueFace[x,y]
+                if hueFace[x,y]<mini:
+                    mini=hueFace[x,y]
+                    
+
+            numPixels = hueFace.height * hueFace.width
+            H = H/numPixels
+            S = S/numPixels
+            V = V/numPixels
+
+        print "average (h s v) is: (%f %f %f)" % (H, S, V)
+        print "max is: %f   mim is: %f" % (maxi, mini)
+
+        hueTrshld = cv.CreateMat(hueImg.height, hueImg.width, cv.CV_8UC1)
+        for x in range(0, hueTrshld.height):
+            for y in range(0, hueTrshld.width):
+                if hueImg[x,y]>(H-30) and hueImg[x,y]>(2) and hueImg[x,y]<(H+30) and satImg[x,y]>(S) and satImg[x,y]<(S+30):
+                    hueTrshld[x,y] = 255
+                else:
+                    hueTrshld[x,y] = 0
+
+        hueTrshldErode = cv.CreateMat(hueImg.height, hueImg.width, cv.CV_8UC1)        
+        hueTrshldDilate = cv.CreateMat(hueImg.height, hueImg.width, cv.CV_8UC1)        
+
+
+#        kernel10 = cv.CreateStructuringElementEx(10,10,0,0, cv.CV_SHAPE_RECT)
+#        kernel6 = cv.CreateStructuringElementEx(6,6,0,0, cv.CV_SHAPE_RECT)
+#        cv.Erode(hueTrshld, hueTrshldErode, kernel6, 1)
+#        cv.Dilate(hueTrshldErode, hueTrshldDilate, kernel6, 1)
+
+        
+        cv.ShowImage("hueTrshld", hueTrshld)
+#        cv.ShowImage("hueTrshld", hueTrshldDilate)
+
+#        print getHistValues(img)
 
 if __name__ == '__main__':
 
     parser = OptionParser(usage = "usage: %prog [options] [filename|camera_index]")
 #    parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = "C:\OpenCV2.1\data\haarcascades/haarcascade_frontalface_alt.xml")
-    parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = "..\haarcascades\haarcascade_frontalface_alt.xml")
+    parser.add_option("-c", "--cascade", action="store", dest="cascade", type="str", help="Haar cascade file, default %default", default = "haarcascades\haarcascade_frontalface_alt.xml")
     (options, args) = parser.parse_args()
 
     print options.cascade
@@ -131,6 +196,9 @@ if __name__ == '__main__':
 
     cv.NamedWindow("result", 1)
     cv.NamedWindow("resultFace", cv.CV_WINDOW_AUTOSIZE)
+    cv.NamedWindow("hue", cv.CV_WINDOW_AUTOSIZE)
+    cv.NamedWindow("hueImg", cv.CV_WINDOW_AUTOSIZE)
+    cv.NamedWindow("hueTrshld", cv.CV_WINDOW_AUTOSIZE)
 
     if capture:
         frame_copy = None
@@ -158,5 +226,6 @@ if __name__ == '__main__':
 
     cv.DestroyWindow("result")
     cv.DestroyWindow("resultFace")
+    cv.DestroyWindow("hue")
 
 
