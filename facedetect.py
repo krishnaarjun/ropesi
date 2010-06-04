@@ -1,14 +1,9 @@
 #!/usr/bin/python
-"""
-This program is demonstration for face and object detection using haar-like features.
-The program finds faces in a camera image or video stream and displays a red box around them.
-
-Original C implementation by:  ?
-Python implementation by: Roman Stanchak, James Bowman
-"""
 import sys
 import cv
 from optparse import OptionParser
+from hs_histogram import *
+from peopleDetect import *
 
 # Parameters for haar detection
 # From the API:
@@ -27,32 +22,8 @@ haar_flags = 0
 # variables to store average hue and saturation
 global H
 global S
-
 H=S=0
 hasColor =0
-
-class getHistValues: # not used right now
-    def __init__(self,img,roi=None):
-        if roi:
-            cv.SetImageROI( img._hue, roi );
-            cv.SetImageROI( img._val, roi );
-            cv.SetImageROI( img._sat, roi );
-
-        cv.CalcHist([img._hue, img._sat, img._val], img._histHSV, 0 );
-        (_, _, _, maxBin) = cv.GetMinMaxHistValue( img._histHSV );
-
-        # raise offset and multiply bins to best HSV values
-        (h, s, v) = [x + 1 for x in maxBin];
-        (hv, sv, vv) = ( 180/img._histBins, 255/25, 255/25);
-
-        values = (h*hv, s*sv, v*vv);
-
-        if roi:
-            cv.ResetImageROI( img._hue );
-            cv.ResetImageROI( img._sat );
-            cv.ResetImageROI( img._val );
-
-        return values;
 
 class getSkinColor:
     def __init__(self,img,hasColor):
@@ -63,24 +34,17 @@ class getSkinColor:
 
         # allocate temporary images
         gray = cv.CreateImage((img.width,img.height), 8, 1)
-#        small_img = cv.CreateImage((cv.Round(img.width / image_scale),
-#                       cv.Round (img.height / image_scale)), 8, 1)
 
         # convert color input image to grayscale
         cv.CvtColor(img, gray, cv.CV_BGR2GRAY)
 
         # scale input image for faster processing
-#        cv.Resize(gray, small_img, cv.CV_INTER_LINEAR)
-
         cv.EqualizeHist(gray, gray)
         
         faces = cv.HaarDetectObjects(gray, cascade, cv.CreateMemStorage(0),
                                      haar_scale, min_neighbors, haar_flags, min_size)
         if faces:
             for ((x, y, w, h), n) in faces:
-
-##                print "(x, y, w, h) = (%d, %d, %d, %d)" % (x, y, w, h)
-##                print "width is %d and height is %d" % (img.width, img.height)
 
                 faceX = x
                 faceY = y
@@ -92,8 +56,7 @@ class getSkinColor:
                 verScl = int(faceH * reScale)
                     
                 rect = (faceX+horScl,faceY+verScl,faceW-(horScl*2),faceH-(verScl*2))
-                # the input to cv.HaarDetectObjects was resized, so scale the 
-                # bounding box of each face and convert it to two CvPoints
+
                 pt1 = (int(x), int(y))
                 pt2 = (int((x + w)), int((y + h)))
                 cv.Rectangle(img, pt1, pt2, cv.RGB(255, 0, 0), 3, 8, 0)
@@ -109,59 +72,34 @@ class getSkinColor:
         cv.ResetImageROI(img);
         cv.ShowImage("resultFace", face)
 
-        faceHSV = cv.CreateImage(cv.GetSize(face), 8, 3)
-        cv.CvtColor(face, faceHSV, cv.CV_BGR2HSV);
-
-        hueFace = cv.CreateMat(face.height, face.width, cv.CV_8UC1)
-        satFace = cv.CreateMat(face.height, face.width, cv.CV_8UC1)
-        valFace = cv.CreateMat(face.height, face.width, cv.CV_8UC1)
-        cv.Split(faceHSV, hueFace, satFace, valFace, None)
-
-        cv.ShowImage("hue", hueFace)
-
-        #intitialize value to store average Hue value
-        maxi=0
-        mini=1000
-
-        #local hue and saturation
-        Hl = Sl = 0
+        hist = hs_histogram(face)
+        myHist = hist.getHist()
+        cv.ShowImage("histImg", myHist) #original
+        [histHue,histSat] = hist.getMinMax()
+        print "hueBin: %d  >>> satBin:%d" % (histHue,histSat)
         
-        for x in range(0, hueFace.height):
-            for y in range(0, hueFace.width):
-                Hl = Hl + hueFace[x,y]
-                Sl = Sl + satFace[x,y]
-#                Vl = Vl + valFace[x,y]
-                if hueFace[x,y]>maxi:
-                    maxi=hueFace[x,y]
-                if hueFace[x,y]<mini:
-                    mini=hueFace[x,y]
-                    
+        #as initialized in hs_histogram.py
+        h_bins = 9
+        s_bins = 16
 
-            numPixels = hueFace.height * hueFace.width
-            Hl = Hl/numPixels
-            Sl = Sl/numPixels
-#            V = V/numPixels
-#            print "skin color (H, S) = (%f, %f)" % (Hl,Sl)
-
+        hueFromHist = int(int((180/9)*histHue)+int((180/9)*histHue+1)/2)
+        satFromHist = int(int((255/9)*histSat)+int((255/9)*histSat+1)/2)
+        
         if not hasColor:
             global H
-            global S
-            H = Hl
-            S = Sl
-        
-
+            global S         
+            H = hueFromHist
+            S = satFromHist
+            hasColor=1
 
 class detect_and_draw:
     def __init__(self,img):
-        
+
         small_img = cv.CreateImage((cv.Round(img.width / image_scale),cv.Round(img.height / image_scale)), 8, 3)
         cv.Resize(img, small_img, cv.CV_INTER_LINEAR)
 
-        global hasColor
-
-        if H==0 and S ==0:
-            hasColor=1
-        getSkinColor(small_img, hasColor)
+        if H!=0 and S !=0:
+            getSkinColor(small_img, hasColor)
 
         imgHSV = cv.CreateImage(cv.GetSize(small_img), 8, 3)
         cv.CvtColor(small_img, imgHSV, cv.CV_BGR2HSV);
@@ -200,6 +138,8 @@ class detect_and_draw:
         cv.ShowImage("hueTrshldDi", hueTrshldDilate) #dilated
         cv.ShowImage("hueTrshldEr", hueTrshldErode)  #eroded
 
+
+
 if __name__ == '__main__':
 
     parser = OptionParser(usage = "usage: %prog [options] [filename|camera_index]")
@@ -223,6 +163,7 @@ if __name__ == '__main__':
     cv.NamedWindow("hueTrshldOr", cv.CV_WINDOW_AUTOSIZE)
     cv.NamedWindow("hueTrshldEr", cv.CV_WINDOW_AUTOSIZE)
     cv.NamedWindow("hueTrshldDi", cv.CV_WINDOW_AUTOSIZE)
+    cv.NamedWindow("histImg", cv.CV_WINDOW_AUTOSIZE)
 
     frameCount=0
     totalTime=0
@@ -242,6 +183,8 @@ if __name__ == '__main__':
                 cv.Copy(frame, frame_copy)
             else:
                 cv.Flip(frame, frame_copy, 0)
+                
+#            peopleDetect(frame_copy)
             
             detect_and_draw(frame_copy)
 
@@ -265,4 +208,4 @@ if __name__ == '__main__':
     cv.DestroyWindow("hueTrshldOr")
     cv.DestroyWindow("hueTrshldEr")
     cv.DestroyWindow("hueTrshldDi")
-
+    cv.DestroyWindow("histImg")
