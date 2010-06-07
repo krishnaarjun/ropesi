@@ -30,7 +30,7 @@ class extractBG:
     
     def getBG(self,bgImg,currFrame):
     
-        motionDiff=30
+        motionDiff=60
         
         grayFrame = cv.CreateImage((currFrame.width,currFrame.height), 8, 1)
         cv.CvtColor(currFrame, grayFrame, cv.CV_BGR2GRAY)
