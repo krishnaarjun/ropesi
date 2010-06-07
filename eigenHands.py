@@ -1,13 +1,16 @@
-#!/usr/local/bin/python
 # Class that get the eigen hands out of a video with hands and stores them
 #
 # Input:
-# - default_width = the width of the image from camera	 
+# - default_width  = the width of the image from camera	 
 # - default_height = the height of the image from camera	 
-# - rescale_ratio = thr ratio with which the image needs to be scaled	  
+# - rescale_ratio  = thr ratio with which the image needs to be scaled	  
 #
 # Output:
-#  - getHandsVideo get the images for the training set
+# - getHandsVideo()        => get the images for the training set
+# - makeMatrix(dir)        => creates a matrix out of a set of images from a directory "dir"
+# - cv2array(img, depth)   => converts a cv matrix to a numpy array (if "depth" is 0 the cv matrix is an image)
+# - array2cv(array, isImg) => converts a numpy array to a cv matrix (if "isImg" is 1 it converrts to a cv image)
+# - doPCA(dataMat, nrComp) => returns the projection matrix, the eigenvalues and the mean of the data from the cv matrix "dataMat"
 
 import sys
 import urllib
@@ -46,7 +49,7 @@ class eigenHands:
 				cv.Resize(img,small_img)
 				cv.SetImageROI(small_img, ((int(img_width/2)-45), (int(img_heigth/2)-45), 70, 70));
 				cv.CvtColor(small_img, gray_img, cv.CV_BGR2GRAY)		
-				cv.EqualizeHist(hands, hands)			
+				cv.EqualizeHist(gray_img, gray_img)			
 				cv.ShowImage("camera", gray_img)
 				cv.SaveImage("train/camera"+str(index)+".jpg", gray_img)
 				cv.ResetImageROI(small_img)
@@ -64,7 +67,7 @@ class eigenHands:
 			for j in range(0,4900):
 				imgMatrix[index,j] = handsMat[0,j]
 		   	index += 1
-		cv.Save(fold+"Train.dat", imgMatrix)
+		cv.Save("data_train/"+fold+"Train.dat", imgMatrix)
 		#cv.NamedWindow("show", 1)
 		#cv.ShowImage("show", cv.Reshape(imgMatrix[0], 0, 70))
 		#cv.WaitKey()
@@ -72,10 +75,12 @@ class eigenHands:
 	#perform PCA on set of all images
 	def doPCA(self, matName, nrComp):
 		#0) convert the cvMatrix to a numpy array
-		mat    = cv.Load(matName+"Train.dat")
+		mat    = cv.Load("data_train/"+matName+"Train.dat")
 		preX   = numpy.asfarray(self.cv2array(mat,0))
 		X      = preX[:,:,0]
 		nr,dim = X.shape
+		if(nrComp >= nr):
+			nrComp = nr
 		
 		#1) extract the mean of the images out of each image
 		meanX = X.mean(axis=0)
@@ -94,7 +99,7 @@ class eigenHands:
 		finLi  = li[::-1] #reverse since eigenvalues are in increasing order
 		
 		#3) do projection/back-projection on first N components to check
-		#projX = numpy.dot(X, ui[:,0:nrComp])
+		projX = numpy.dot(X, ui[:,0:nrComp])
 		#backX = numpy.dot(projX, ui[:,0:nrComp].T)
 		#for i in range(0, nr):
 		#	backX[i] += meanX
@@ -104,7 +109,7 @@ class eigenHands:
 		#cv.WaitKey()       
 
 		#4) return the projection-matrix, eigen-values and the mean
-		return ui,finLi,meanX
+		return projX,finLi,meanX
 	#________________________________________________________________________
 	#covert an cvMatrix (image) to a numpy array 	
 	def cv2array(self,im, depth):
@@ -151,14 +156,14 @@ class eigenHands:
 		cv.SetData(cv_im, arr.tostring(), prevType.itemsize*nChannels*arr.shape[1])
 		return cv_im			
 #________________________________________________________________________
-hands = eigenHands()
+#hands = eigenHands()
 #hands.getHandsVideo()
 #crate the matrixes for all train sets: garb, rock, paper, scissors
 #hands.makeMatrix("garb")
 #hands.makeMatrix("rock")
 #hands.makeMatrix("paper")
 #hands.makeMatrix("scissors")
-hands.doPCA("rock",1)
+#hands.doPCA("rock",1)
 
 
 
