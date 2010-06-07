@@ -3,7 +3,6 @@ import sys
 import cv
 from optparse import OptionParser
 from hs_histogram import *
-from peopleDetect import *
 
 # Parameters for haar detection
 # From the API:
@@ -24,6 +23,54 @@ global H
 global S
 H=S=0
 hasColor =0
+
+class extractBG:
+    def __init__(self,motionImg):
+        self.motionImg = motionImg
+    
+    def getBG(self,bgImg,currFrame):
+    
+        motionDiff=30
+        
+        grayFrame = cv.CreateImage((currFrame.width,currFrame.height), 8, 1)
+        cv.CvtColor(currFrame, grayFrame, cv.CV_BGR2GRAY)
+        
+#        diffImg = cv.CreateImage((currFrame.width,currFrame.height), 8, 1)
+        
+        for x in range(0, self.motionImg.height):
+            for y in range(0, self.motionImg.width):
+                if abs(bgImg[x,y]-grayFrame[x,y])>motionDiff:
+                    self.motionImg[x,y]=255
+                else:
+                    self.motionImg[x,y]=0
+
+        return self.motionImg
+#        cv.ShowImage("motion", diffImg) #motion
+
+class getBG:
+    def __init__(self,bgTotal):
+        self.bgTotal = bgTotal
+#       totalFramesForBG = frame_copy_gray
+#       totalFramesForBG = getBR(totalFramesForBG)
+    def addToTotal(self,newImg):
+        #Add new image to total
+        cv.Add(self.bgTotal,newImg,self.bgTotal,None)
+        return self.bgTotal
+#        totalFramesForBG.addToTotal(frame_copy_gray)
+        
+    def getAverage(self,frameCnt):
+        #return average image (background)
+        for x in range(0, self.bgTotal.height):
+            for y in range(0, self.bgTotal.width):
+                print "pixle value: %f" % self.bgTotal[x,y]
+                self.bgTotal[x,y] = self.bgTotal[x,y]/frameCnt
+                #print "pixle value: %f" % self.bgTotal[x,y]
+        return self.bgTotal
+#       bgImg = cv.CreateImage(cv.GetSize(frame_copy_gray),8,1)
+#       bgImg = totalFramesForBG.getAverage(30)
+
+        
+        
 
 class getSkinColor:
     def __init__(self,img,hasColor):
@@ -164,9 +211,15 @@ if __name__ == '__main__':
     cv.NamedWindow("hueTrshldEr", cv.CV_WINDOW_AUTOSIZE)
     cv.NamedWindow("hueTrshldDi", cv.CV_WINDOW_AUTOSIZE)
     cv.NamedWindow("histImg", cv.CV_WINDOW_AUTOSIZE)
+    cv.NamedWindow("BG", cv.CV_WINDOW_AUTOSIZE)
+    cv.NamedWindow("motion", cv.CV_WINDOW_AUTOSIZE)
+    cv.NamedWindow("motionInImg", cv.CV_WINDOW_AUTOSIZE)
 
     frameCount=0
     totalTime=0
+    
+    framesForBackGround = 10
+    
     if capture:
         frame_copy = None
         while True:
@@ -184,16 +237,48 @@ if __name__ == '__main__':
             else:
                 cv.Flip(frame, frame_copy, 0)
                 
-#            peopleDetect(frame_copy)
+            frame_copy_gray = cv.CreateImage((frame_copy.width,frame_copy.height), 8, 1)
+            # convert color input image to grayscale
+            cv.CvtColor(frame_copy, frame_copy_gray, cv.CV_BGR2GRAY)
             
-            detect_and_draw(frame_copy)
+            if frameCount<framesForBackGround+1:
+                #use frame for background extraction
+                if frameCount==1:
+                    backgroundImg = cv.CreateImage(cv.GetSize(frame_copy_gray),8,1)
+                    backgroundImg = frame_copy_gray
+                    print "New totalFrame initialized"
+                else:
+                    for x in range(0, backgroundImg.height):
+                        for y in range(0, backgroundImg.width):
+                            backgroundImg[x,y] = ((backgroundImg[x,y]*(frameCount-1))+frame_copy_gray[x,y])/frameCount
+                    cv.ShowImage("BG", backgroundImg) #background
+                    print "totalFrame updated"
+            else:
+                #finished getting background. Ready to detect
+                motion = cv.CreateImage((frame_copy.width,frame_copy.height), 8, 1)
+                motion = extractBG(motion)
+                motion = motion.getBG(backgroundImg,frame_copy)
+                cv.ShowImage("motion", motion) #motion
+                
+                motionInImg = cv.CreateImage((frame_copy.width,frame_copy.height), 8, 3)
+                
+                for x in range(0, motionInImg.height):
+                    for y in range(0, motionInImg.width):
+                        if motion[x,y]==255:
+                            motionInImg[x,y] = frame_copy[x,y]
+                        else:
+                            motionInImg[x,y] = (0,0,0)
+                        
+                
+                cv.ShowImage("motionInImg", motionInImg) #motion
+                
+                detect_and_draw(motionInImg)
 
             if cv.WaitKey(10) >= 0:
                 break
             #stop timer and show elapsed time
             t = cv.GetTickCount() - t
             totalTime += t/(cv.GetTickFrequency()*1000.)
-##            print "detection time = %gms" % (t/(cv.GetTickFrequency()*1000.))
             if frameCount%10==0:
                 print "after %i frames the average time = %gms" % (frameCount, totalTime/frameCount)
     else:
@@ -209,3 +294,6 @@ if __name__ == '__main__':
     cv.DestroyWindow("hueTrshldEr")
     cv.DestroyWindow("hueTrshldDi")
     cv.DestroyWindow("histImg")
+    cv.DestroyWindow("BG")
+    cv.DestroyWindow("motion")
+#    cv.DestroyWindow("motionPartOfImg")
