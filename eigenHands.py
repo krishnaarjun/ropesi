@@ -47,7 +47,7 @@ class eigenHands:
 			index += 1
 			if(index % 50 == 0):
 				cv.Resize(img,small_img)
-				cv.SetImageROI(small_img, ((int(img_width/2)-45), (int(img_heigth/2)-45), 70, 70));
+				cv.SetImageROI(small_img, ((int(img_width/2)-45), (int(img_heigth/2)-45), 70, 70))
 				cv.CvtColor(small_img, gray_img, cv.CV_BGR2GRAY)		
 				cv.EqualizeHist(gray_img, gray_img)			
 				cv.ShowImage("camera", gray_img)
@@ -60,28 +60,29 @@ class eigenHands:
 	def makeMatrix(self, fold):
 		files     = os.listdir('train/'+fold)
 		imgMatrix = cv.CreateMat(len(files), 4900, cv.CV_8UC1)
-		index     = 0
-		for aImage in glob.glob(os.path.join("train/"+fold, '*.jpg')):
+		anIndex   = 0
+		matches   = glob.glob(os.path.join("train/"+fold, '*.jpg'))
+		matches.sort()
+		for aImage in matches:
 			hands    = cv.LoadImageM(aImage, cv.CV_LOAD_IMAGE_GRAYSCALE)
 			handsMat = cv.Reshape(hands, 0, 1)
 			for j in range(0,4900):
-				imgMatrix[index,j] = handsMat[0,j]
-		   	index += 1
-		cv.Save("data_train/"+fold+"Train.dat", imgMatrix)
-		#cv.NamedWindow("show", 1)
-		#cv.ShowImage("show", cv.Reshape(imgMatrix[0], 0, 70))
+				imgMatrix[anIndex,j] = handsMat[0,j]
+			anIndex += 1
+
+		#cv.NamedWindow("show1",1)
+		#cv.ShowImage("show1", cv.Reshape(imgMatrix[0,:], 0, 70))
 		#cv.WaitKey()
+		cv.Save("data_train/"+fold+"Train.dat", imgMatrix)	
 	#________________________________________________________________________
 	#perform PCA on set of all images
-	def doPCA(self, matName, nrComp):
+	def doPCA(self, matName, noComp, showIm):
 		#0) convert the cvMatrix to a numpy array
 		mat    = cv.Load("data_train/"+matName+"Train.dat")
 		preX   = numpy.asfarray(self.cv2array(mat,0))
 		X      = preX[:,:,0]
 		nr,dim = X.shape
-		if(nrComp >= nr):
-			nrComp = nr
-		
+
 		#1) extract the mean of the images out of each image
 		meanX = X.mean(axis=0)
 		for i in range(0, nr):
@@ -99,17 +100,18 @@ class eigenHands:
 		finLi  = li[::-1] #reverse since eigenvalues are in increasing order
 		
 		#3) do projection/back-projection on first N components to check
-		projX = numpy.dot(X, ui[:,0:nrComp])
-		#backX = numpy.dot(projX, ui[:,0:nrComp].T)
-		#for i in range(0, nr):
-		#	backX[i] += meanX
-		#eigenHand = self.array2cv(backX, 1)
-		#cv.NamedWindow("PCA", 1)
-		#cv.ShowImage("PCA", cv.Reshape(eigenHand[0], 0, 70))
-		#cv.WaitKey()       
+		if(showIm >= 0 and showIm < X.shape[0]):
+			projX = numpy.dot(ui[0:noComp,:], X)
+			backX = numpy.dot(ui[0:noComp,:].T, projX)
+			for i in range(0, nr):
+				backX[i] += meanX
+			eigenHand = self.array2cv(backX, 1)
+			cv.NamedWindow("PCA", 1)
+			cv.ShowImage("PCA", cv.Reshape(eigenHand[showIm], 0, 70))
+			cv.WaitKey()       
 
 		#4) return the projection-matrix, eigen-values and the mean
-		return projX,finLi,meanX
+		return ui,X,finLi,meanX
 	#________________________________________________________________________
 	#covert an cvMatrix (image) to a numpy array 	
 	def cv2array(self,im, depth):
@@ -156,14 +158,14 @@ class eigenHands:
 		cv.SetData(cv_im, arr.tostring(), prevType.itemsize*nChannels*arr.shape[1])
 		return cv_im			
 #________________________________________________________________________
-#hands = eigenHands()
+hands = eigenHands()
 #hands.getHandsVideo()
 #crate the matrixes for all train sets: garb, rock, paper, scissors
-#hands.makeMatrix("garb")
+#hands.makeMatrix("test")
 #hands.makeMatrix("rock")
 #hands.makeMatrix("paper")
 #hands.makeMatrix("scissors")
-#hands.doPCA("rock",1)
+#hands.doPCA("paper", noComp, -1)
 
 
 
