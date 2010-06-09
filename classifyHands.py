@@ -19,15 +19,16 @@ import cv
 import numpy 
 import os
 import glob
-import svm
+import mlpy
 from PIL import Image
 from eigenHands import *
 class classifyHands:
 	def __init__(self, makeData):
 		self.pca = eigenHands()
 		#create the data matrix if they are not there
-		self.pca.makeMatrix("test")
-		#self.pca.makeMatrix("hands")
+		self.pca.makeMatrix("hands")
+		self.pca.makeMatrix("garb")
+
 		if(makeData == True):
 			self.pca.makeMatrix("hands")
 			self.pca.makeMatrix("rock")
@@ -44,6 +45,50 @@ class classifyHands:
 	#________________________________________________________________________
 	#get the training set from video of hands
 	def classifyHands(self, noComp):
+		#0) get training data data and the samples 	
+		garb,dataG,liG,meanG  = self.pca.doPCA("garb", noComp, -1)
+		hands,dataH,liH,meanH = self.pca.doPCA("hands", noComp, -1)
+
+		test,dataT,liT,meanT  = self.pca.doPCA("test", noComp, -1)
+		#labelsTrain           = numpy.ones(hands.shape, dtype=int)
+
+		labels = []
+		train  = numpy.empty((garb.shape[0], hands.shape[1]+garb.shape[1]), dtype=int)
+		print hands.shape
+		print garb.shape
+		print train.shape
+
+		for i in range(0, hands.shape[1]+garb.shape[1]):
+			if(i<hands.shape[1]):
+				labels.append(1)
+				train[:,i] = hands[:,i]
+			else:
+				labels.append(-1)
+				train[:,i] = garb[:,(i-hands.shape[1])]
+		labelsTrain = numpy.asarray(labels)
+		print labelsTrain.shape
+		print train.shape
+		
+			
+		#2) initialize the svm and compute the model 		
+		problem      = mlpy.Svm(kernel='linear', kp=0.1, C=1.0, eps=0.001)
+		problem.compute(train.T, labelsTrain)
+		predictTrain = problem.predict(train.T)	
+		trainErr     = mlpy.err(labelsTrain, predictTrain)
+		print trainErr
+
+		#4) test the classification
+		labelsTest  = [1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+		predictTest = problem.predict(test.T)	
+		testErr     = mlpy.err(labelsTest, predictTest)
+
+		print testErr			
+		print noComp
+		return problem
+
+	#________________________________________________________________________
+	#get the training set from video of hands
+	def oldclassifyHands(self, noComp):
 		#0) noComp needs to be the same for all sets 	
 		hands,dataH,liH,meanH = self.pca.doPCA("hands", noComp, -1)
 		test,dataT,liT,meanT  = self.pca.doPCA("test", noComp, -1)
