@@ -51,7 +51,7 @@ class eigenHands:
 				cv.CvtColor(small_img, gray_img, cv.CV_BGR2GRAY)		
 				cv.EqualizeHist(gray_img, gray_img)			
 				cv.ShowImage("camera", gray_img)
-				cv.SaveImage("train/14camera"+str(index)+".jpg", gray_img)
+				cv.SaveImage("train/17camera"+str(index)+".jpg", gray_img)
 				cv.ResetImageROI(small_img)
     			if cv.WaitKey(10)==27:
        		 		break
@@ -111,7 +111,7 @@ class eigenHands:
 			cv.WaitKey()       
 
 		#4) return the projection-matrix, eigen-values and the mean
-		return ui,X,finLi,meanX
+		return ui[0:noComp,:],X,finLi,meanX
 	#________________________________________________________________________
 	#covert an cvMatrix (image) to a numpy array 	
 	def cv2array(self,im, depth):
