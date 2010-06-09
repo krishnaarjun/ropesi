@@ -51,7 +51,7 @@ class eigenHands:
 				cv.CvtColor(small_img, gray_img, cv.CV_BGR2GRAY)		
 				cv.EqualizeHist(gray_img, gray_img)			
 				cv.ShowImage("camera", gray_img)
-				cv.SaveImage("train/camera"+str(index)+".jpg", gray_img)
+				cv.SaveImage("train/14camera"+str(index)+".jpg", gray_img)
 				cv.ResetImageROI(small_img)
     			if cv.WaitKey(10)==27:
        		 		break
@@ -158,7 +158,7 @@ class eigenHands:
 		cv.SetData(cv_im, arr.tostring(), prevType.itemsize*nChannels*arr.shape[1])
 		return cv_im			
 #________________________________________________________________________
-hands = eigenHands()
+#hands = eigenHands()
 #hands.getHandsVideo()
 #crate the matrixes for all train sets: garb, rock, paper, scissors
 #hands.makeMatrix("test")
