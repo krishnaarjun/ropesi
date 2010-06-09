@@ -22,13 +22,11 @@ import glob
 import mlpy
 from PIL import Image
 from eigenHands import *
+from numpy.random import shuffle
 class classifyHands:
 	def __init__(self, makeData):
 		self.pca = eigenHands()
 		#create the data matrix if they are not there
-		self.pca.makeMatrix("hands")
-		self.pca.makeMatrix("garb")
-
 		if(makeData == True):
 			self.pca.makeMatrix("hands")
 			self.pca.makeMatrix("rock")
@@ -45,84 +43,51 @@ class classifyHands:
 	#________________________________________________________________________
 	#get the training set from video of hands
 	def classifyHands(self, noComp):
-		#0) get training data data and the samples 	
+		#0) get training data data and the labels 	
 		garb,dataG,liG,meanG  = self.pca.doPCA("garb", noComp, -1)
 		hands,dataH,liH,meanH = self.pca.doPCA("hands", noComp, -1)
 
-		test,dataT,liT,meanT  = self.pca.doPCA("test", noComp, -1)
-		#labelsTrain           = numpy.ones(hands.shape, dtype=int)
+		garb = garb[:,0:92]
+		hands = hands[:,0:225]
 
-		labels = []
-		train  = numpy.empty((garb.shape[0], hands.shape[1]+garb.shape[1]), dtype=int)
-		print hands.shape
-		print garb.shape
-		print train.shape
-
+		labels = numpy.empty(hands.shape[1]+garb.shape[1], dtype=int)
+		train  = numpy.empty((hands.shape[1]+garb.shape[1],garb.shape[0]), dtype=float)
+		indexs = numpy.empty(hands.shape[1]+garb.shape[1], dtype=int)
 		for i in range(0, hands.shape[1]+garb.shape[1]):
+			indexs[i] = i
 			if(i<hands.shape[1]):
-				labels.append(1)
-				train[:,i] = hands[:,i]
+				labels[i]  = 1
+				train[i,:] = hands[:,i]
 			else:
-				labels.append(-1)
-				train[:,i] = garb[:,(i-hands.shape[1])]
-		labelsTrain = numpy.asarray(labels)
-		print labelsTrain.shape
-		print train.shape
-		
-			
+				labels[i]  = -1
+				train[i,:] = garb[:,(i-hands.shape[1])]
+
 		#2) initialize the svm and compute the model 		
-		problem      = mlpy.Svm(kernel='linear', kp=0.1, C=1.0, eps=0.001)
-		problem.compute(train.T, labelsTrain)
-		predictTrain = problem.predict(train.T)	
-		trainErr     = mlpy.err(labelsTrain, predictTrain)
-		print trainErr
+		problem = mlpy.Svm(kernel='gaussian', kp=0.5, tol=0.000001, eps=0.0000001, maxloops=10000)
 
-		#4) test the classification
-		labelsTest  = [1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
-		predictTest = problem.predict(test.T)	
-		testErr     = mlpy.err(labelsTest, predictTest)
+		#2) shuffle input data to do the 10-fold split 
+		shuffle(indexs)
+		labels = labels[indexs]
+		train  = train[indexs,:] 
 
-		print testErr			
-		print noComp
-		return problem
+		print labels
+		print train.shape
 
-	#________________________________________________________________________
-	#get the training set from video of hands
-	def oldclassifyHands(self, noComp):
-		#0) noComp needs to be the same for all sets 	
-		hands,dataH,liH,meanH = self.pca.doPCA("hands", noComp, -1)
-		test,dataT,liT,meanT  = self.pca.doPCA("test", noComp, -1)
+		#3) define the folds, train and test
+		pred_err  = 0.0
+		folds     = mlpy.kfoldS(cl = labels, sets = 5)
 		
-		#1) define the problem: labels & samples 
-		labels  = []
-		samples = []
-		for i in range(0, hands.shape[1]):
-			samples.append(hands[0:noComp, i].tolist())
-			labels.append(0)
-
-		#2) store the problem :-/
-		problem = svm.svm_problem(labels, samples)
-		size    = len(samples)
-
-		#3) generate the model from the data 
-		#types   = [svm.NU_SVR, svm.NU_SVC, svm.C_SVC, svm.ONE_CLASS, svm.EPSILON_SVR]
-		#kernels = [svm.LINEAR, svm.POLY, svm.RBF, svm.SIGMOID, svm.PRECOMPUTED]
-		param = svm.svm_parameter(svm_type = svm.ONE_CLASS, kernel_type = svm.RBF)
-		model = svm.svm_model(problem, param)
-
-		#4) make some prediction :-s
-		groundTruth = [1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
-		error       = 0.0
-		for i in range(0, test.shape[1]):
-			prediction = model.predict(test[0:noComp, i].tolist())
-			if(int(prediction) != int(groundTruth[i])):
-				error += 1.0 
-			print prediction
-
-		error = float(error)/float(len(groundTruth))
-		print error			
-		print noComp
-		return model
+		for trainI, testI in folds:
+			trainSet, testSet = train[trainI], train[testI]
+        		trainLab, testLab = labels[trainI], labels[testI]
+			learned           = problem.compute(trainSet, trainLab)
+			print "it learned >>> "+str(learned)
+        		prediction        = problem.predict(testSet)
+			pred_err         += mlpy.err(testLab, prediction)
+			print pred_err
+		avg_err = float(pred_err)/float(len(folds))
+		print avg_err
+		return problem
 	#________________________________________________________________________
 	#get the training set from video of hands
 	def classifySigns(self):
@@ -136,5 +101,5 @@ class classifyHands:
 
 #________________________________________________________________________
 classi = classifyHands(False)
-classi.classifyHands(1000)
+classi.classifyHands(1500)
 
