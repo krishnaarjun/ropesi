@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import sys
 import cv
-from optparse import OptionParser
 from hs_histogram import *
+from optparse import OptionParser
 
 # Parameters for haar detection
 # From the API:
