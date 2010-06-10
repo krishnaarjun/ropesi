@@ -5,9 +5,12 @@
 # - pca = an object of the class "eigenHands" 
 #
 # Output:
-# - merge(bigList)        => merges 2 lists where "bigList" = [list1, list2]
-# - classifyHands(noComp) => classifies hands from non-hands using the eigenHands defined by the "noComp" 
-# - classifySigns()       => classifies new images as rocks, papers or scissors
+# - merge(bigList)                      => merges 2 lists where "bigList" = [list1, list2]
+# - classifyHands(noComp,onImg,theSign) => classifies hands from non-hands using the eigenHands defined by the "noComp" for the data given by "theSign" 
+# - getDataLabels(noComp,onImg,theSign) => returns data-set and labels (if onImg is true then returns the images, else the eigenhands); 
+#					   "theSign" -- is "hands" for hands vs no-hands
+#					             -- is "rock" for rock vs paper&scissors
+#						     -- is "paper" for papaer vs scissors								
 
 import sys
 import urllib
@@ -28,6 +31,7 @@ class classifyHands:
 		self.pca = eigenHands()
 		#create the data matrix if they are not there
 		if(makeData == True):
+			self.pca.makeMatrix("garb")
 			self.pca.makeMatrix("hands")
 			self.pca.makeMatrix("rock")
 			self.pca.makeMatrix("paper")
@@ -40,43 +44,64 @@ class classifyHands:
 		for x in aList:
 		    merged.append(x)
 	    return merged 
+
 	#________________________________________________________________________
-	#get the training set from video of hands
-	def classifyHands(self, noComp):
-		#0) get training data data and the labels 	
-		garb,dataG,liG,meanG  = self.pca.doPCA("garb", noComp, -1)
-		hands,dataH,liH,meanH = self.pca.doPCA("hands", noComp, -1)
-
-		garb = garb[:,0:92]
-		hands = hands[:,0:225]
-
-		labels = numpy.empty(hands.shape[1]+garb.shape[1], dtype=int)
-		train  = numpy.empty((hands.shape[1]+garb.shape[1],garb.shape[0]), dtype=float)
-		indexs = numpy.empty(hands.shape[1]+garb.shape[1], dtype=int)
-		for i in range(0, hands.shape[1]+garb.shape[1]):
-			indexs[i] = i
-			if(i<hands.shape[1]):
-				labels[i]  = 1
-				train[i,:] = hands[:,i]
+	#get the training set and the labels
+	def getDataLabels(self, noComp, onImg, theSign):
+		signs = {"hands":["garb"], "rock":["paper", "scissors"], "paper":["garb"]}
+		if(onImg == True):
+			good = (self.pca.justGetDataMat(theSign)).T
+		else:
+			good,_,_ = self.pca.doPCA(theSign, noComp, 1)	 
+		bad     = []
+		badSize = 0
+ 		for aSign in signs[theSign]:
+			if(onImg == True):
+				preBad = (self.pca.justGetDataMat(aSign)).T
 			else:
-				labels[i]  = -1
-				train[i,:] = garb[:,(i-hands.shape[1])]
+				preBad,_,_ = self.pca.doPCA(aSign, noComp, 1)			 	
+			badSize += preBad.shape[1]
+			bad.append(preBad)
+		labels    = numpy.empty(good.shape[1]+badSize, dtype=int)
+		train     = numpy.empty((good.shape[1]+badSize, good.shape[0]), dtype=float)
+		indexs    = numpy.empty(good.shape[1]+badSize, dtype=int)
+		sizeSoFar = 0
+		j         = 0	
+		for i in range(0, good.shape[1]+badSize):
+			indexs[i] = i
+			if(i<good.shape[1]):
+				labels[i]  = 1
+				train[i,:] = good[:,i]
+			else:
+				labels[i] = -1
+				ind       = (i-good.shape[1])-sizeSoFar
+				if((ind-bad[j].shape[1]) == 0):
+					sizeSoFar += bad[j].shape[1]
+					j         += 1
+					ind        = (i-good.shape[1])-sizeSoFar
+				train[i,:] = bad[j][:,ind]
+		return indexs,labels,train
 
-		#2) initialize the svm and compute the model 		
-		problem = mlpy.Svm(kernel='gaussian', kp=0.5, tol=0.000001, eps=0.0000001, maxloops=10000)
+	#________________________________________________________________________
+	#classify images using svm
+	def classifyHands(self, noComp, onImg, theSign):
+		#0) get training data data and the labels
+		indexs,labels,train = self.getDataLabels(noComp, onImg, theSign)
+
+		#2) initialize the svm and compute the model
+		if(theSign == "hands"): #the model for hands/no-hands 		
+			problem = mlpy.Svm(kernel='gaussian', kp=0.3, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
+		else: #the model for signs
+			problem = mlpy.Svm(kernel='polynomial', kp=1.0, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
 
 		#2) shuffle input data to do the 10-fold split 
 		shuffle(indexs)
 		labels = labels[indexs]
 		train  = train[indexs,:] 
 
-		print labels
-		print train.shape
-
 		#3) define the folds, train and test
-		pred_err  = 0.0
-		folds     = mlpy.kfoldS(cl = labels, sets = 5)
-		
+		pred_err = 0.0
+		folds    = mlpy.kfoldS(cl = labels, sets = 3)
 		for trainI, testI in folds:
 			trainSet, testSet = train[trainI], train[testI]
         		trainLab, testLab = labels[trainI], labels[testI]
@@ -88,18 +113,8 @@ class classifyHands:
 		avg_err = float(pred_err)/float(len(folds))
 		print avg_err
 		return problem
-	#________________________________________________________________________
-	#get the training set from video of hands
-	def classifySigns(self):
-		""".."""
-		#pred_label, pred_probability = model.predict_probability(test[i, 0:noComp].tolist())
-		#if(pred_label == 1):
-		#	labelName = "hands"
-		#else:
-		#	labelName = "garb"
-		#print "label:"+str(labelName)+"["+str(pred_label)+"] >>> prob:"+str(pred_probability)
-
 #________________________________________________________________________
-classi = classifyHands(False)
-classi.classifyHands(1500)
+classi = classifyHands(True)
+classi.classifyHands(1500, False, "rock")
+
 
