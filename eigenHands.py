@@ -69,18 +69,18 @@ class eigenHands:
 			for j in range(0,4900):
 				imgMatrix[anIndex,j] = handsMat[0,j]
 			anIndex += 1
-
-		#cv.NamedWindow("show1",1)
-		#cv.ShowImage("show1", cv.Reshape(imgMatrix[0,:], 0, 70))
-		#cv.WaitKey()
 		cv.Save("data_train/"+fold+"Train.dat", imgMatrix)	
+	#________________________________________________________________________
+	#just read the cvMat of data and transforms it to a numpy matrix 
+	def justGetDataMat(self, what):
+		mat     = cv.Load("data_train/"+what+"Train.dat")
+		preData = numpy.asfarray(self.cv2array(mat,0))
+		return preData[:,:,0]	
 	#________________________________________________________________________
 	#perform PCA on set of all images
 	def doPCA(self, matName, noComp, showIm):
 		#0) convert the cvMatrix to a numpy array
-		mat    = cv.Load("data_train/"+matName+"Train.dat")
-		preX   = numpy.asfarray(self.cv2array(mat,0))
-		X      = preX[:,:,0]
+		X      = self.justGetDataMat(matName)
 		nr,dim = X.shape
 
 		#1) extract the mean of the images out of each image
@@ -88,17 +88,16 @@ class eigenHands:
 		for i in range(0, nr):
 			X[i,:] -= meanX
 		
-		#2) compute the projection matrix: (X * X.T)/N * vi = li * vi
-		#   ui = (X.T * vi)/sqrt(N * li)
-		otherS = numpy.dot(X, X.T) #compute: (X * X.T)/N
-		otherS = numpy.divide(otherS, float(nr))
+		#2) compute the projection matrix: (X * X.T) * vi = li * vi
+		#   ui[:,i] = (X.T * vi)/norm(ui[:,i])
+		otherS = numpy.dot(X, X.T) #compute: (X * X.T)
 		li,vi  = numpy.linalg.eigh(otherS) #eigenvalues and eigenvectors of (X * X.T)/N
-		ui     = numpy.dot(X.T, vi) #the formula for the highdim data
-		for i in range(0, nr):
-			ui[:,i] = numpy.divide(ui[:,i], numpy.sqrt(float(nr) * li[i])) 	
-		ui     = ui[:,::-1] #reverse since last eigenvectors are the ones we want
-		finLi  = li[::-1] #reverse since eigenvalues are in increasing order
-		
+		vi     = vi[:,::-1] #reverse since last eigenvectors are the ones we want
+		li     = li[::-1] #reverse since eigenvalues are in increasing order	
+		ui     = numpy.dot(X.T, vi) #the formula for the highdim data	
+		for i in range(0, nr): #normalize the final eigenvectors
+			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))
+
 		#3) do projection/back-projection on first N components to check
 		if(showIm >= 0 and showIm < X.shape[0]):
 			projX = numpy.dot(ui[0:noComp,:], X)
@@ -108,10 +107,11 @@ class eigenHands:
 			eigenHand = self.array2cv(backX, 1)
 			cv.NamedWindow("PCA", 1)
 			cv.ShowImage("PCA", cv.Reshape(eigenHand[showIm], 0, 70))
+			print "press any key.."
 			cv.WaitKey()       
 
 		#4) return the projection-matrix, eigen-values and the mean
-		return ui[0:noComp,:],X,finLi,meanX
+		return ui[0:noComp,:],X,meanX
 	#________________________________________________________________________
 	#covert an cvMatrix (image) to a numpy array 	
 	def cv2array(self,im, depth):
@@ -165,7 +165,7 @@ class eigenHands:
 #hands.makeMatrix("rock")
 #hands.makeMatrix("paper")
 #hands.makeMatrix("scissors")
-#hands.doPCA("paper", noComp, -1)
+#hands.doPCA("paper", 1000, 0)
 
 
 
