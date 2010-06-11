@@ -73,22 +73,20 @@ class gaborFilters:
 		finalData = cv.CreateMat(data.height, data.width, cv.CV_8UC1)
 		for i in range(0,data.height):
 			reshData = cv.Reshape(data[i], 0, 70)
-			#cv.Smooth(reshData,reshData)
+			if(isPrint == True and i == 0):
+				cv.NamedWindow("img", 1)
+				cv.ShowImage("img", reshData)
 			cv.Filter2D(reshData,reshData,wavelet)	
 			temp = cv.Reshape(reshData, 0, 1)		
 			for j in range(0,temp.width):			
 				finalData[i,j] = temp[0,j]
-			
+			if(isPrint == True and i == 0):
+				cv.NamedWindow("response", 1)
+				cv.ShowImage("response", reshData)
+				print "press any key.."
+				cv.WaitKey()      	
 	
-		cv.Save("data_train/"+what+"GaborTrain.dat",finalData)
-		if(isPrint == True):
-			cv.NamedWindow("img", 1)
-			cv.ShowImage("img", cv.Reshape(data[data.height-1,:],0,70))
-
-			cv.NamedWindow("response", 1)
-			cv.ShowImage("response", reshData)
-			print "press any key.."
-			cv.WaitKey()      		
+		cv.Save("data_train/"+what+"GaborTrain.dat",finalData)	
 
 #________________________________________________________________________
 #lambda=[2,256], gamma=[0.2,1], psi=[0,180], theta=[0,180], sigma=[3,68]
