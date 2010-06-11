@@ -25,13 +25,19 @@ import glob
 import mlpy
 from eigenHands import *
 class gaborFilters:
-	def __init__(self, lambd, gamma, psi, theta, sigma):
+	def __init__(self, lambd, gamma, psi, theta, sigma, makeData):
 		self.lambd = lambd
 		self.gamma = gamma
 		self.psi   = psi
 		self.theta = theta
 		self.sigma = sigma
 		self.pca   = eigenHands()
+		if(makeData == True):
+			self.pca.makeMatrix("garb")
+			self.pca.makeMatrix("hands")
+			self.pca.makeMatrix("rock")
+			self.pca.makeMatrix("paper")
+			self.pca.makeMatrix("scissors")
 	#________________________________________________________________________
 	#create the gabor filter with the parameters and return the wavelet
 	def createGabor(self,dimension,isPrint):
@@ -56,7 +62,6 @@ class gaborFilters:
 			showG  = numpy.divide(showG, max)
 			showG  = numpy.dot(showG, 255)
 			imageG = self.pca.array2cv(showG, 1)
-			#cv.EqualizeHist(wavelet, wavelet)
 			cv.NamedWindow("gabor", 1)
 			cv.ShowImage("gabor", imageG)
 			print "press any key .."
@@ -84,15 +89,14 @@ class gaborFilters:
 				cv.NamedWindow("response", 1)
 				cv.ShowImage("response", reshData)
 				print "press any key.."
-				cv.WaitKey()      	
-	
+				cv.WaitKey()      
 		cv.Save("data_train/"+what+"GaborTrain.dat",finalData)	
 
 #________________________________________________________________________
 #lambda=[2,256], gamma=[0.2,1], psi=[0,180], theta=[0,180], sigma=[3,68]
-gabor = gaborFilters(5.0, 1.0, 10.0, -45.0, 7.0)
+gabor = gaborFilters(3.0, 1.0, 10.0, -45.0, 8.0, True)
 #gabor.createGabor(5,True)
-gabor.convolveImg("rock",True)
+gabor.convolveImg("paper",True)
 
 
 
