@@ -8,6 +8,7 @@
 # Output:
 # - getHandsVideo()        => get the images for the training set
 # - makeMatrix(dir)        => creates a matrix out of a set of images from a directory "dir"
+# - justGetDataMat(what)   => just retunrs the stored data cv matrix corresponding to "what" (hands,rock,paper,scissors)
 # - cv2array(img, depth)   => converts a cv matrix to a numpy array (if "depth" is 0 the cv matrix is an image)
 # - array2cv(array, isImg) => converts a numpy array to a cv matrix (if "isImg" is 1 it converrts to a cv image)
 # - doPCA(dataMat, nrComp) => returns the projection matrix, the eigenvalues and the mean of the data from the cv matrix "dataMat"
@@ -51,12 +52,12 @@ class eigenHands:
 				cv.CvtColor(small_img, gray_img, cv.CV_BGR2GRAY)		
 				cv.EqualizeHist(gray_img, gray_img)			
 				cv.ShowImage("camera", gray_img)
-				cv.SaveImage("train/17camera"+str(index)+".jpg", gray_img)
+				cv.SaveImage("train/1camera"+str(index)+".jpg", gray_img)
 				cv.ResetImageROI(small_img)
     			if cv.WaitKey(10)==27:
        		 		break
 	#________________________________________________________________________
-	#store the images from the input file/files into a huge matrix	
+	#store the images from the input file/files into a huge cv matrix	
 	def makeMatrix(self, fold):
 		files     = os.listdir('train/'+fold)
 		imgMatrix = cv.CreateMat(len(files), 4900, cv.CV_8UC1)
@@ -66,7 +67,7 @@ class eigenHands:
 		for aImage in matches:
 			hands    = cv.LoadImageM(aImage, cv.CV_LOAD_IMAGE_GRAYSCALE)
 			handsMat = cv.Reshape(hands, 0, 1)
-			for j in range(0,4900):
+			for j in range(0,handsMat.width):
 				imgMatrix[anIndex,j] = handsMat[0,j]
 			anIndex += 1
 		cv.Save("data_train/"+fold+"Train.dat", imgMatrix)	
@@ -77,7 +78,7 @@ class eigenHands:
 		preData = numpy.asfarray(self.cv2array(mat,0))
 		return preData[:,:,0]	
 	#________________________________________________________________________
-	#perform PCA on set of all images
+	#perform PCA on set of all images from matName
 	def doPCA(self, matName, noComp, showIm):
 		#0) convert the cvMatrix to a numpy array
 		X      = self.justGetDataMat(matName)
@@ -97,7 +98,7 @@ class eigenHands:
 		ui     = numpy.dot(X.T, vi) #the formula for the highdim data	
 		for i in range(0, nr): #normalize the final eigenvectors
 			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))
-
+	
 		#3) do projection/back-projection on first N components to check
 		if(showIm >= 0 and showIm < X.shape[0]):
 			projX = numpy.dot(ui[0:noComp,:], X)
@@ -140,6 +141,7 @@ class eigenHands:
 			arr = numpy.array(arr, dtype=numpy.uint8)
 			prevType = numpy.dtype(numpy.uint8)
 		else:
+			print arr.dtype
 			prevType = arr.dtype
 		dtype2depth = {
 			'uint8':   cv.IPL_DEPTH_8U,
@@ -156,7 +158,11 @@ class eigenHands:
 			nChannels = 1
 		cv_im = cv.CreateImageHeader((arr.shape[1],arr.shape[0]), dtype2depth[str(prevType)],nChannels)
 		cv.SetData(cv_im, arr.tostring(), prevType.itemsize*nChannels*arr.shape[1])
-		return cv_im			
+
+		if(isImg == 1):
+			return cv_im
+		else:
+			return cv.GetMat(cv_im, 0)	
 #________________________________________________________________________
 #hands = eigenHands()
 #hands.getHandsVideo()
