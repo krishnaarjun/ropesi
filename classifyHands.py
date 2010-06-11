@@ -46,20 +46,20 @@ class classifyHands:
 	    return merged 
 
 	#________________________________________________________________________
-	#get the training set and the labels
+	#get the training set and the labels 
 	def getDataLabels(self, noComp, onImg, theSign):
 		signs = {"hands":["garb"], "rock":["paper", "scissors"], "paper":["garb"]}
 		if(onImg == True):
 			good = (self.pca.justGetDataMat(theSign)).T
 		else:
-			good,_,_ = self.pca.doPCA(theSign, noComp, 1)	 
+			good,_,_ = self.pca.doPCA(theSign, noComp, -1)	 
 		bad     = []
 		badSize = 0
  		for aSign in signs[theSign]:
 			if(onImg == True):
 				preBad = (self.pca.justGetDataMat(aSign)).T
 			else:
-				preBad,_,_ = self.pca.doPCA(aSign, noComp, 1)			 	
+				preBad,_,_ = self.pca.doPCA(aSign, noComp, -1)			 	
 			badSize += preBad.shape[1]
 			bad.append(preBad)
 		labels    = numpy.empty(good.shape[1]+badSize, dtype=int)
@@ -90,9 +90,9 @@ class classifyHands:
 
 		#2) initialize the svm and compute the model
 		if(theSign == "hands"): #the model for hands/no-hands 		
-			problem = mlpy.Svm(kernel='gaussian', kp=0.3, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
+			problem = mlpy.Svm(kernel='gaussian', C=1.0, kp=0.3, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
 		else: #the model for signs
-			problem = mlpy.Svm(kernel='polynomial', kp=1.0, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
+			problem = mlpy.Svm(kernel='gaussian', C=1.0, kp=0.1, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
 
 		#2) shuffle input data to do the 10-fold split 
 		shuffle(indexs)
@@ -101,7 +101,7 @@ class classifyHands:
 
 		#3) define the folds, train and test
 		pred_err = 0.0
-		folds    = mlpy.kfoldS(cl = labels, sets = 3)
+		folds    = mlpy.kfoldS(cl = labels, sets = 5)
 		for trainI, testI in folds:
 			trainSet, testSet = train[trainI], train[testI]
         		trainLab, testLab = labels[trainI], labels[testI]
