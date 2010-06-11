@@ -7,7 +7,10 @@
 # Output:
 # - merge(bigList)                      => merges 2 lists where "bigList" = [list1, list2]
 # - classifyHands(noComp,onImg,theSign) => classifies hands from non-hands using the eigenHands defined by the "noComp" for the data given by "theSign" 
-# - getDataLabels(noComp,onImg,theSign) => returns data-set and labels (if onImg is true then returns the images, else the eigenhands); 
+#					   "onImg" -- 1 for the reshaped image to 70x70
+#					   	   -- 2 for the image with PCA
+#						   -- 3 for the image convolved with a Gabor-Wavelet	 	 		
+# - getDataLabels(noComp,onImg,theSign) => returns data-set and labels corresponding to the option "onImg"; 
 #					   "theSign" -- is "hands" for hands vs no-hands
 #					             -- is "rock" for rock vs paper&scissors
 #						     -- is "paper" for papaer vs scissors								
@@ -49,17 +52,21 @@ class classifyHands:
 	#get the training set and the labels 
 	def getDataLabels(self, noComp, onImg, theSign):
 		signs = {"hands":["garb"], "rock":["paper", "scissors"], "paper":["garb"]}
-		if(onImg == True):
+		if(onImg == 1):
 			good = (self.pca.justGetDataMat(theSign)).T
-		else:
+		elif(onImg == 2):
 			good,_,_ = self.pca.doPCA(theSign, noComp, -1)	 
+		elif(onImg == 3):
+			good = (self.pca.justGetDataMat(theSign+"Gabor")).T
 		bad     = []
 		badSize = 0
  		for aSign in signs[theSign]:
-			if(onImg == True):
+			if(onImg == 1):
 				preBad = (self.pca.justGetDataMat(aSign)).T
-			else:
+			elif(onImg == 2):
 				preBad,_,_ = self.pca.doPCA(aSign, noComp, -1)			 	
+			elif(onImg == 3):
+				preBad = (self.pca.justGetDataMat(aSign+"Gabor")).T
 			badSize += preBad.shape[1]
 			bad.append(preBad)
 		labels    = numpy.empty(good.shape[1]+badSize, dtype=int)
@@ -90,7 +97,7 @@ class classifyHands:
 
 		#2) initialize the svm and compute the model
 		if(theSign == "hands"): #the model for hands/no-hands 		
-			problem = mlpy.Svm(kernel='gaussian', C=1.0, kp=0.3, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
+			problem = mlpy.Svm(kernel='gaussian', C=1.0, kp=0.1, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
 		else: #the model for signs
 			problem = mlpy.Svm(kernel='gaussian', C=1.0, kp=0.1, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
 
@@ -101,7 +108,7 @@ class classifyHands:
 
 		#3) define the folds, train and test
 		pred_err = 0.0
-		folds    = mlpy.kfoldS(cl = labels, sets = 5)
+		folds    = mlpy.kfoldS(cl = labels, sets = 10)
 		for trainI, testI in folds:
 			trainSet, testSet = train[trainI], train[testI]
         		trainLab, testLab = labels[trainI], labels[testI]
@@ -115,6 +122,6 @@ class classifyHands:
 		return problem
 #________________________________________________________________________
 classi = classifyHands(True)
-classi.classifyHands(1500, False, "rock")
+classi.classifyHands(1500, 2, "hands")
 
 
