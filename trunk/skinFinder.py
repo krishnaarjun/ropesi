@@ -11,6 +11,7 @@ if __name__ == '__main__':
     cv.NamedWindow("skinProbThreshH", 1)
     cv.NamedWindow("skinProbThreshHEroDel", 1)
     cv.NamedWindow("skinProbColor", 1)
+    cv.NamedWindow("skinProbSmoothed", 1)
 
     capture = cv.CreateCameraCapture(int(0))
     
@@ -87,6 +88,7 @@ if __name__ == '__main__':
                     cv.SetImageROI(frameSmallHSV, rect);
                     face = cv.CreateImage(cv.GetSize(frameSmallHSV),frameSmallHSV.depth,frameSmallHSV.nChannels);
                     cv.Copy(frameSmallHSV, face);
+                    faceArea = face.height*face.width
                     cv.ResetImageROI(frameSmallHSV);
 
                     cv.ShowImage("face", face) #inside of face
@@ -147,8 +149,6 @@ if __name__ == '__main__':
                             if probIntensity>maxProbInt:
                                 maxProbInt=probIntensity
                     
-#                    cv.EqualizeHist(skinProbImg, skinProbImg)
-                    
                     ### intensity according to histogramprobability###
                     for x in range(0, skinProbImg.height):
                         for y in range(0, skinProbImg.width):
@@ -159,12 +159,14 @@ if __name__ == '__main__':
 
                     cv.ShowImage("skinProb", skinProbImg) #Original image
 
-                    cv.Smooth(skinProbImg,skinProbImg)
+                    cv.Smooth(skinProbImg,skinProbImg,cv.CV_BLUR_NO_SCALE)
+                    cv.Smooth(skinProbImg,skinProbImg,cv.CV_BLUR_NO_SCALE)
+                    cv.ShowImage("skinProbSmoothed", skinProbImg) #Original image
 
                     ### thresholded histogramprobability intensity###
                     for x in range(0, skinProbImg.height):
                         for y in range(0, skinProbImg.width):
-                            if skinProbImg[x,y]>80:
+                            if skinProbImg[x,y]>180:
                                 skinProbImg[x,y] = 255
                             else:
                                 skinProbImg[x,y] = 0
@@ -177,8 +179,8 @@ if __name__ == '__main__':
                     kernel6 = cv.CreateStructuringElementEx(6,6,0,0, cv.CV_SHAPE_RECT)
                     kernel4 = cv.CreateStructuringElementEx(4,4,0,0, cv.CV_SHAPE_RECT)
 
-                    cv.Dilate(skinProbImg, skinProbImg, kernel6, 1)
-                    cv.Erode(skinProbImg, skinProbImg, kernel10, 1)
+                    cv.Erode(skinProbImg, skinProbImg, kernel15, 1)
+                    cv.Dilate(skinProbImg, skinProbImg, kernel10, 1)
 
                     cv.ShowImage("skinProbThreshHEroDel", skinProbImg) #Original image
                     
@@ -187,15 +189,17 @@ if __name__ == '__main__':
                     
                     contours = cv.CreateMemStorage()
                     seq = cv.FindContours(skinProbImg, contours, cv.CV_RETR_EXTERNAL);
-                    #print len(seq)
-                    #cv.DrawContours(skinProbColor,seq,(255,0,0),(0,255,0),0)
-                    while seq:
-                        seqRect = cv.MinAreaRect2(seq)
 
+                    while seq:
+                        cv.DrawContours(skinProbColor,seq,(255,0,0),(255,255,0),0,2)
+                        seqRect = cv.BoundingRect(seq)
+                        x = seqRect[0]
+                        y = seqRect[1]
+                        w = seqRect[2]
+                        h = seqRect[3]
+                        cv.Rectangle(skinProbColor, (x,y), (x+w,y+h), cv.RGB(0, 255, 0), 3, 8, 0)
                         seq = seq.h_next()
-#                        if seqRect[2]==0:
-                        cv.Rectangle(skinProbColor, seqRect[0], seqRect[1], cv.RGB(0, 255, 0), 3, 8, 0)
-                    
+
                     cv.ShowImage("skinProbColor", skinProbColor) #Original image
 
             cv.ShowImage("input", frameSmall) #Original image
