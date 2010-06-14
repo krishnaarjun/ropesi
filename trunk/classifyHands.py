@@ -26,7 +26,7 @@ import numpy
 import os
 import glob
 import mlpy
-from PIL import Image
+#from PIL import Image
 from eigenHands import *
 from numpy.random import shuffle
 class classifyHands:
