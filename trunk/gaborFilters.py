@@ -1,4 +1,4 @@
-# Convolve an image with a gabor filter and return the resulted marix for all images to be classified
+# Convolve an image with a Gabor filter and return the resulted marix for all images to be classified
 #
 # Input:
 # - lambda => wavelength between 2 and 256
@@ -8,9 +8,13 @@
 #	      for antisymmetric functions: between -90 and 90 	 		
 # - gamma  => ellipticity of the Gaussian factor; valid values between 0.2 and 1  
 # - sigma  => valid values between 3 and 68
+# - dim    => the dimension od the Gabor wavelet is proportional with "dim"
 #
 # Output:
-# - 
+# - setParameters(lambda,gamma,psi,theta,sigma,dim) => set the parameter of the Gabor filter
+# - createGabor(isPrint)      => creates a Gabor wavelet with the given parameters
+# - convolveImg(data,isPrint) => reshapes each row in "data" to the size of the original images (70x70) and convolves them with 
+#				 the computed Gabor wavelet
 
 import sys
 import urllib
@@ -27,6 +31,12 @@ from eigenHands import *
 class gaborFilters:
 	def __init__(self, makeData):
 		self.pca = eigenHands()
+		self.lambd = None
+		self.gamma = None
+		self.psi   = None
+		self.theta = None
+		self.sigma = None
+		self.dim   = None
 		if(makeData == True):
 			self.pca.makeMatrix("garb")
 			self.pca.makeMatrix("hands")
@@ -35,20 +45,21 @@ class gaborFilters:
 			self.pca.makeMatrix("scissors")
 	#________________________________________________________________________
 	#create the gabor filter with the parameters and return the wavelet
-	def setParameters(self, lambd, gamma, psi, theta, sigma):
+	def setParameters(self, lambd, gamma, psi, theta, sigma, dim):
 		self.lambd = lambd
 		self.gamma = gamma
 		self.psi   = psi
 		self.theta = theta
 		self.sigma = sigma
+		self.dim   = dim
 	#________________________________________________________________________
 	#create the gabor filter with the parameters and return the wavelet
-	def createGabor(self,dimension,isPrint):
+	def createGabor(self, isPrint):
 		sigmaX = float(self.sigma)
 		sigmaY = float(self.sigma)/float(self.gamma)
-		xMax   = numpy.maximum(numpy.abs(dimension*sigmaX*numpy.cos(self.theta)),numpy.abs(dimension*sigmaY*numpy.sin(self.theta)))		
+		xMax   = numpy.maximum(numpy.abs(self.dim*sigmaX*numpy.cos(self.theta)),numpy.abs(self.dim*sigmaY*numpy.sin(self.theta)))		
 		xMax   = numpy.ceil(numpy.maximum(1.0,xMax))
-		yMax   = numpy.maximum(numpy.abs(dimension*sigmaX*numpy.cos(self.theta)),numpy.abs(dimension*sigmaY*numpy.sin(self.theta)))
+		yMax   = numpy.maximum(numpy.abs(self.dim*sigmaX*numpy.cos(self.theta)),numpy.abs(self.dim*sigmaY*numpy.sin(self.theta)))
 		yMax   = numpy.ceil(numpy.maximum(1.0,xMax))
 		xMin   = -xMax
 		yMin   = -yMax
@@ -75,7 +86,7 @@ class gaborFilters:
 	#________________________________________________________________________
 	#covolve an the images with gabor a given filter
 	def convolveImg(self, data, isPrint):
-		_,wavelet = self.createGabor(2, isPrint)
+		_,wavelet = self.createGabor(isPrint)
 		finalData = cv.CreateMat(data.height, data.width, cv.CV_8UC1)
 		for i in range(0,data.height):
 			reshData = cv.Reshape(data[i], 0, 70)
@@ -93,12 +104,6 @@ class gaborFilters:
 				cv.WaitKey()     
 		return finalData
 #________________________________________________________________________
-#lambda=[2,256], gamma=[0.2,1], psi=[0,180], theta=[0,180], sigma=[3,68]
-gabor = gaborFilters(True)
-gabor.setParameters(3.0, 1.0, 10.0, -45.0, 8.0)
-#gabor.createGabor(5,True)
-data  = cv.Load("data_train/rockTrain.dat")
-gabor.convolveImg(data,True)
 
 
 
