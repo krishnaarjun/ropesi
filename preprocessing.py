@@ -90,7 +90,7 @@ class preprocessing:
 		#4) do PCA on the concatenated convolved images ?????????????????????????
 		preToSVM,_,_ = self.pca.doPCA(convo, gaborComp, -1)
 		toSVM        = self.pca.array2cv(preToSVM, False)
-		#cv.Save("data_train/"+theSign+"GaborTrain.dat", toSVM)
+		cv.Save("data_train/"+theSign+"GaborTrain.dat", toSVM)
 		return toSVM
 #____________________________________________________________________________________________
 

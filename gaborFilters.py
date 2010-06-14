@@ -101,8 +101,8 @@ class gaborFilters:
                 finalData[i,j] = temp[0,j]
             if(isPrint == True and i < 999):
                 cv.ShowImage("response", reshData)
-                print "press any key.."
-                cv.WaitKey() 
+#                print "press any key.."
+#                cv.WaitKey() 
         return finalData
 #________________________________________________________________________
 
