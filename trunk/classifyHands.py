@@ -53,40 +53,42 @@ class classifyHands:
 	def getDataLabels(self, noComp, onImg, theSign):
 		signs = {"hands":["garb"], "rock":["paper", "scissors"], "paper":["garb"]}
 		if(onImg == 1):
-			good = (self.pca.justGetDataMat(theSign)).T
+			good = self.pca.justGetDataMat(theSign)
 		elif(onImg == 2):
-			good,_,_ = self.pca.doPCA(theSign, noComp, -1)	 
+			zaData   = self.pca.justGetDataMat(theSign)
+			good,_,_ = self.pca.doPCA(zaData, noComp, -1)	
 		elif(onImg == 3):
-			good = (self.pca.justGetDataMat(theSign+"Gabor")).T
+			good = self.pca.justGetDataMat(theSign+"Gabor")
 		bad     = []
 		badSize = 0
  		for aSign in signs[theSign]:
 			if(onImg == 1):
-				preBad = (self.pca.justGetDataMat(aSign)).T
+				preBad = self.pca.justGetDataMat(aSign)
 			elif(onImg == 2):
-				preBad,_,_ = self.pca.doPCA(aSign, noComp, -1)			 	
+				zaData     = self.pca.justGetDataMat(aSign)
+				preBad,_,_ = self.pca.doPCA(zaData, noComp, -1)			 	
 			elif(onImg == 3):
-				preBad = (self.pca.justGetDataMat(aSign+"Gabor")).T
-			badSize += preBad.shape[1]
+				preBad = self.pca.justGetDataMat(aSign+"Gabor")
+			badSize += preBad.shape[0]
 			bad.append(preBad)
-		labels    = numpy.empty(good.shape[1]+badSize, dtype=int)
-		train     = numpy.empty((good.shape[1]+badSize, good.shape[0]), dtype=float)
-		indexs    = numpy.empty(good.shape[1]+badSize, dtype=int)
+		labels    = numpy.empty(good.shape[0]+badSize, dtype=int)
+		train     = numpy.empty((good.shape[0]+badSize, good.shape[1]), dtype=float)
+		indexs    = numpy.empty(good.shape[0]+badSize, dtype=int)
 		sizeSoFar = 0
 		j         = 0	
-		for i in range(0, good.shape[1]+badSize):
+		for i in range(0, good.shape[0]+badSize):
 			indexs[i] = i
-			if(i<good.shape[1]):
+			if(i<good.shape[0]):
 				labels[i]  = 1
-				train[i,:] = good[:,i]
+				train[i,:] = good[i,:]
 			else:
 				labels[i] = -1
-				ind       = (i-good.shape[1])-sizeSoFar
-				if((ind-bad[j].shape[1]) == 0):
-					sizeSoFar += bad[j].shape[1]
+				ind       = (i-good.shape[0])-sizeSoFar
+				if((ind-bad[j].shape[0]) == 0):
+					sizeSoFar += bad[j].shape[0]
 					j         += 1
-					ind        = (i-good.shape[1])-sizeSoFar
-				train[i,:] = bad[j][:,ind]
+					ind        = (i-good.shape[0])-sizeSoFar
+				train[i,:] = bad[j][ind,:]
 		return indexs,labels,train
 
 	#________________________________________________________________________
@@ -118,10 +120,8 @@ class classifyHands:
 			pred_err         += mlpy.err(testLab, prediction)
 			print pred_err
 		avg_err = float(pred_err)/float(len(folds))
-		print avg_err
+		print "\nAverage error over 10 folds:"+str(avg_err)
 		return problem
 #________________________________________________________________________
-classi = classifyHands(True)
-classi.classifyHands(1500, 2, "hands")
 
 
