@@ -25,19 +25,22 @@ import glob
 import mlpy
 from eigenHands import *
 class gaborFilters:
-	def __init__(self, lambd, gamma, psi, theta, sigma, makeData):
-		self.lambd = lambd
-		self.gamma = gamma
-		self.psi   = psi
-		self.theta = theta
-		self.sigma = sigma
-		self.pca   = eigenHands()
+	def __init__(self, makeData):
+		self.pca = eigenHands()
 		if(makeData == True):
 			self.pca.makeMatrix("garb")
 			self.pca.makeMatrix("hands")
 			self.pca.makeMatrix("rock")
 			self.pca.makeMatrix("paper")
 			self.pca.makeMatrix("scissors")
+	#________________________________________________________________________
+	#create the gabor filter with the parameters and return the wavelet
+	def setParameters(self, lambd, gamma, psi, theta, sigma):
+		self.lambd = lambd
+		self.gamma = gamma
+		self.psi   = psi
+		self.theta = theta
+		self.sigma = sigma
 	#________________________________________________________________________
 	#create the gabor filter with the parameters and return the wavelet
 	def createGabor(self,dimension,isPrint):
@@ -58,45 +61,44 @@ class gaborFilters:
 		if(isPrint == True):
 			mini   = numpy.min(gabor)
 			showG  = gabor+numpy.abs(mini)
-			max    = numpy.max(showG)
-			showG  = numpy.divide(showG, max)
+			maxi   = numpy.max(showG)
+			showG  = numpy.divide(showG, maxi)
 			showG  = numpy.dot(showG, 255)
-			imageG = self.pca.array2cv(showG, 1)
+			imageG = self.pca.array2cv(showG,True)
 			cv.NamedWindow("gabor", 1)
 			cv.ShowImage("gabor", imageG)
 			print "press any key .."
 			cv.WaitKey()
-		gabor   = numpy.asarray(gabor, dtype=numpy.float32)
-		wavelet = self.pca.array2cv(gabor, 0)
+		wavelet = self.pca.array2cv(gabor, False)
 		print gabor.shape      		
 		return gabor,wavelet
 	#________________________________________________________________________
 	#covolve an the images with gabor a given filter
-	def convolveImg(self,what,isPrint):
-		_,wavelet = self.createGabor(2,True)
-		data      = cv.Load("data_train/"+what+"Train.dat")
+	def convolveImg(self, data, isPrint):
+		_,wavelet = self.createGabor(2, isPrint)
 		finalData = cv.CreateMat(data.height, data.width, cv.CV_8UC1)
 		for i in range(0,data.height):
 			reshData = cv.Reshape(data[i], 0, 70)
-			if(isPrint == True and i == 0):
-				cv.NamedWindow("img", 1)
-				cv.ShowImage("img", reshData)
+			if(isPrint == True and i < 2):
+				cv.NamedWindow("img"+str(i), 1)
+				cv.ShowImage("img"+str(i), reshData)
 			cv.Filter2D(reshData,reshData,wavelet)	
 			temp = cv.Reshape(reshData, 0, 1)		
 			for j in range(0,temp.width):			
 				finalData[i,j] = temp[0,j]
-			if(isPrint == True and i == 0):
-				cv.NamedWindow("response", 1)
-				cv.ShowImage("response", reshData)
+			if(isPrint == True and i < 2):
+				cv.NamedWindow("response"+str(i), 1)
+				cv.ShowImage("response"+str(i), reshData)
 				print "press any key.."
-				cv.WaitKey()      
-		cv.Save("data_train/"+what+"GaborTrain.dat",finalData)	
-
+				cv.WaitKey()     
+		return finalData
 #________________________________________________________________________
 #lambda=[2,256], gamma=[0.2,1], psi=[0,180], theta=[0,180], sigma=[3,68]
-gabor = gaborFilters(3.0, 1.0, 10.0, -45.0, 8.0, True)
+gabor = gaborFilters(True)
+gabor.setParameters(3.0, 1.0, 10.0, -45.0, 8.0)
 #gabor.createGabor(5,True)
-gabor.convolveImg("paper",True)
+data  = cv.Load("data_train/rockTrain.dat")
+gabor.convolveImg(data,True)
 
 
 
