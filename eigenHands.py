@@ -82,7 +82,7 @@ class eigenHands:
 			cv.WaitKey()       
 
 		#4) return the projection-matrix, eigen-values and the mean
-		return ui[0:noComp,:],X,meanX
+		return (ui[0:noComp,:]).T,X,meanX
 	#________________________________________________________________________
 	#covert an cvMatrix / cvImage to a numpy.array 	
 	def cv2array(self, im, isImg):
@@ -133,10 +133,6 @@ class eigenHands:
 		else:
 			return cv.GetMat(cv_im, 1)	
 #________________________________________________________________________
-#hands = eigenHands()
-#hands.makeMatrix("hands")
-#X = hands.justGetDataMat("rock")
-#hands.doPCA(X, 1000, True)
 
 
 
