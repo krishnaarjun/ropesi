@@ -22,7 +22,7 @@ import cv
 import numpy 
 import os
 import glob
-from PIL import Image
+#from PIL import Image
 class eigenHands:
 	def __init__(self):
 		"""Nothing ;)"""
