@@ -25,25 +25,38 @@ import glob
 #from PIL import Image
 class eigenHands:
 	def __init__(self):
+		self.sizeImg = 70
 		"""Nothing ;)"""
 	#________________________________________________________________________
 	#store the images from the input file/files into a huge cv.Image-matrix	
 	def makeMatrix(self, fold):
 		files     = os.listdir('train/'+fold)
-		imgMatrix = cv.CreateMat(len(files), 4900, cv.CV_8UC1)		
 		anIndex   = 0
 		matches   = glob.glob(os.path.join("train/"+fold, '*.jpg'))
+
+		print (self.sizeImg*self.sizeImg)		
+		print len(matches)
+
+		imgMatrix = cv.CreateMat(len(matches), (self.sizeImg*self.sizeImg), cv.CV_8UC1)		
+		oneLine   = cv.CreateMat(1, (self.sizeImg*self.sizeImg), cv.CV_8UC1)	
+		resizeImg = cv.CreateMat(self.sizeImg, self.sizeImg, cv.CV_8UC1)
+				
 		matches.sort()
 		for aImage in matches:
 			hands    = cv.LoadImageM(aImage, cv.CV_LOAD_IMAGE_GRAYSCALE)
-			handsMat = cv.Reshape(hands, 0, 1)
+			cv.Resize(hands, resizeImg, interpolation = cv.CV_INTER_AREA)	
+			handsMat = cv.Reshape(resizeImg, 0, 1)
 			for j in range(0,handsMat.width):
-				imgMatrix[anIndex,j] = float(handsMat[0,j])
-			anIndex += 1			
-		#cv.NamedWindow("img", 1)
-		#cv.ShowImage("img",cv.Reshape(imgMatrix[20], 0, 70))
-		#print "press any key.."
-		#cv.WaitKey()       
+				imgMatrix[anIndex,j] = handsMat[0,j]
+				
+			"""cv.NamedWindow("img", 1)
+			for j in range(0, (self.sizeImg*self.sizeImg)):
+				oneLine[0,j] = imgMatrix[anIndex,j]
+			cv.ShowImage("img",cv.Reshape(oneLine, 0, self.sizeImg))
+			print "press any key.."+str(anIndex)
+			cv.WaitKey()"""
+
+			anIndex += 1		
 		cv.Save("data_train/"+fold+"Train.dat", imgMatrix)	
 	#________________________________________________________________________
 	#just read the cvMat of data and transforms it to a numpy matrix 
@@ -77,11 +90,13 @@ class eigenHands:
 				backX[i] += meanX
 			eigenHand = self.array2cv(backX,True)
 			cv.NamedWindow("PCA", 1)
-			cv.ShowImage("PCA", cv.Reshape(eigenHand[0], 0, 70))
+			cv.ShowImage("PCA", cv.Reshape(eigenHand[0], 0, self.sizeImg))
 			print "press any key.."
 			cv.WaitKey()       
 
 		#4) return the projection-matrix, eigen-values and the mean
+		cvData  = hands.array2cv((ui[0:noComp,:]).T, True)	
+		cv.Save("data_train/"+fold+"TrainPCA.dat", cvData)	
 		return (ui[0:noComp,:]).T,X,meanX
 	#________________________________________________________________________
 	#covert an cvMatrix / cvImage to a numpy.array 	
