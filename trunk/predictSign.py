@@ -43,16 +43,23 @@ from preprocessing import *
 from classifyHands import *
 
 class predictSign:
-	def __init__(self, size):
+	def __init__(self, size, makeData):
 		self.pca      = eigenHands(size)
 		self.gabor    = gaborFilters(False, size)
 		self.classify = classifyHands(False, size)
 		self.prep     = preprocessing(size)
+		if(makeData == True):
+	    		self.pca.makeMatrix("garb")
+	    		self.pca.makeMatrix("hands")
+	    		self.pca.makeMatrix("rock")
+	    		self.pca.makeMatrix("paper")
+	    		self.pca.makeMatrix("scissors")
+
 	#________________________________________________________________________
 	#store the models
 	def storeModel(self, model, theSign, onImg):
 		if(model == "svm"):
-			#0) get training data data and the labels			
+			#0) get training data data and the labels
 			indexs,labels,train = self.classify.getDataLabels(onImg, theSign, False)
 
 			#1) initialize the svm and compute the model
@@ -70,12 +77,15 @@ class predictSign:
 
 			#3) generate the svm model
 			learned   = problem.compute(train, labels)
-			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"Knn_problem"+str(onImg)+".dat", "wb")
+			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"Knn_"+str(theSign)+str(onImg)+".dat", "wb")
 			pickle.dump(problem, modelFile)
 			modelFile.close()			
 		else:
 			#0) get training data data and the labels
-			indexs,labels,train = self.classify.getDataLabels(onImg, theSign, True)
+			if(theSign == "rock"):				
+				indexs,labels,train = self.classify.getDataLabels(onImg, theSign, True)
+			else:
+				indexs,labels,train = self.classify.getDataLabels(onImg, theSign, False)
 
 			#1) initialize the svm and compute the model
 			problem = mlpy.Knn(5, dist='se')
@@ -87,16 +97,16 @@ class predictSign:
 
 			#3) generate the Knn model
 			learned   = problem.compute(train, labels)
-			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"Knn_problem"+str(onImg)+".dat", "wb")
+			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"Knn_"+str(theSign)+str(onImg)+".dat", "wb")
 			pickle.dump(problem, modelFile)
 			modelFile.close()
 	#________________________________________________________________________
 	#just load model
-	def loadModel(self, model, zaType):
+	def loadModel(self, model, zaType, theSign):
 		if(model == "svm"):
-			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"SVM_problem"+str(zaType)+".dat", "r")
+			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"SVM_"+str(theSign)+str(zaType)+".dat", "r")
 		else:
-			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"Knn_problem"+str(zaType)+".dat", "r")
+			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"Knn_"+str(theSign)+str(zaType)+".dat", "r")
 		problem = pickle.load(modelFile)
 		modelFile.close()
 		return problem
@@ -113,9 +123,9 @@ class predictSign:
 		prediction = problem.predict(testImg)
 		zaTime     = cv.GetTickCount() - zaTime
 	    	totalTime += zaTime/(cv.GetTickFrequency()*1000.0)
-			
-		print "it is a..."+str(classifyWhat[str(what)][str(prediction[0])])+" >>> prediction time/image %gms" % totalTime
-
+		if(what != "hands"):	
+			print "it is a..."+str(classifyWhat[str(what)][str(prediction[0])])+" >>> prediction time/image %gms" % totalTime
+		return prediction[0]
 	#________________________________________________________________________
 	def preprocessImg(self, image, zaType):
 		#1) resize the image to the needed size
