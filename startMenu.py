@@ -28,14 +28,16 @@ print "\t7 => do some classifications (Knn)"
 print "\t8 => create the FINAL models for classifiers\n"
 choice  = raw_input('your choice... ') 
 sizeImg = raw_input('the size of the training images ...')   
+build   = raw_input('build the training matrixes (y/n) ...')   
 print "\n"
-
+buildOpt = {'y':True, 'n':False}
 if(int(choice) == 1):
 	dataset = raw_input('choose the dataset (r/p/s) ...')   
 	noComp  = raw_input('number of components for PCA ...')         
 	datas   = {'r':'rock', 'p':'paper', 's':'scissors'} 
 	hands   = eigenHands(int(sizeImg))
-	hands.makeMatrix(datas[dataset])
+	if(build == 'y'):
+		hands.makeMatrix(datas[dataset])
 	X = hands.justGetDataMat(datas[dataset])
 	hands.doPCA(X, int(noComp), True, datas[dataset])
 elif(int(choice) == 2):
@@ -49,7 +51,7 @@ elif(int(choice) == 2):
 	dim     = raw_input('define dimension (2 - 10): ...')"""
 	dataset = raw_input('choose the dataset (r/p/s) ...')
 	datas   = {'r':'rock', 'p':'paper', 's':'scissors'} 
-	gabor   = gaborFilters(False,int(sizeImg))
+	gabor   = gaborFilters(buildOpt[str(build)],int(sizeImg))
 	#gabor.setParameters(float(lambd), float(gamma), int(psi), int(theta), float(sigma), int(dim))
 	gabor.setParameters(10, 1.0, 10, -45, 8.0, 2)
 	data    = cv.Load("data_train/"+datas[dataset]+"Train.dat")
@@ -77,19 +79,21 @@ elif(int(choice) == 6):
 	dataset = raw_input('classify h => hands vs garbage; r => rock vs paper & scissors; p => paper vb scissors ...')	
 	typeu   = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
 	datas  = {'r':'rock', 'h':'hands', 'p':'paper'} 
-	classi = classifyHands(False,int(sizeImg))	
+	classi = classifyHands(buildOpt[str(build)],int(sizeImg))	
 	classi.classifySVM(int(typeu), datas[dataset])
 elif(int(choice) == 7):
 	dataset = raw_input('classify h => hands vs garbage; c => rock & paper & scissors ...')	
 	typeu   = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
 	datas  = {'c':'rock', 'h':'hands'} 
-	classi = classifyHands(False,int(sizeImg))	
+	classi = classifyHands(buildOpt[str(build)],int(sizeImg))	
 	classi.classifyKNN(int(typeu), datas[dataset], 5)
 elif(int(choice) == 8):
-	dataset = raw_input('classify h => hands vs garbage; c => rock & paper & scissors ...')	
-	datas   = {'c':'rock', 'h':'hands'} 
-	typeu   = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
-	predict = predictSign(int(sizeImg),True)
-	predict.storeModel("knn", datas[dataset], int(typeu))
+	model    = raw_input('model to built: s => svm; k => knn ...')	
+	dataset  = raw_input('classify h => hands vs garbage; c => rock & paper & scissors ...')	
+	datas    = {'c':'rock', 'h':'hands'} 
+	modelOpt = {'s':'svm', 'k':'knn'} 
+	typeu    = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
+	predict  = predictSign(int(sizeImg),buildOpt[str(build)])
+	predict.storeModel(modelOpt[str(model)], datas[dataset], int(typeu))
 	
 
