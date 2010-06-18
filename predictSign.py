@@ -77,7 +77,7 @@ class predictSign:
 
 			#3) generate the svm model
 			learned   = problem.compute(train, labels)
-			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"Knn_"+str(theSign)+str(onImg)+".dat", "wb")
+			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"SVM_"+str(theSign)+str(onImg)+".dat", "wb")
 			pickle.dump(problem, modelFile)
 			modelFile.close()			
 		else:
