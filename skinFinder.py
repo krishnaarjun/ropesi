@@ -114,6 +114,11 @@ class detectSkin:
                         myHist = hist.getHist(hBins, sBins)
                         (_, maxValue, _, _) = cv.GetMinMaxHistValue(myHist)
                         hasHist = True
+                        myHistMat = cv.CreateMat(hBins, sBins, 1)
+                        for h in range(hBins):
+                                for s in range(sBins):
+                                    binVal = cv.QueryHistValue_2D(myHist, h, s)
+                                    myHistMat[h,s] = binVal
                     ###################################
 
                 else: # if hist already calculated
@@ -124,12 +129,6 @@ class detectSkin:
 
                     binSum = face.height*face.width
                     maxProbInt = 0
-
-                    myHistMat = cv.CreateMat(hBins, sBins, 1)
-                    for h in range(hBins):
-                            for s in range(sBins):
-                                binVal = cv.QueryHistValue_2D(myHist, h, s)
-                                myHistMat[h,s] = binVal
                     
                     for x in range(0, frameSmallHSV.height):
                         for y in range(0, frameSmallHSV.width):
@@ -214,7 +213,7 @@ class detectSkin:
                         cv.InRangeS(skinProbImgOriginal,15,256,skinProbImgOriginal)
                         kernelEr = cv.CreateStructuringElementEx(3,3,0,0, cv.CV_SHAPE_ELLIPSE)
                         cv.Erode(skinProbImgOriginal, skinProbImgOriginal, kernelEr, 1)
-                        kernelDi = cv.CreateStructuringElementEx(7,7,0,0, cv.CV_SHAPE_ELLIPSE)
+                        kernelDi = cv.CreateStructuringElementEx(11,11,0,0, cv.CV_SHAPE_ELLIPSE)
                         cv.Dilate(skinProbImgOriginal, skinProbImgOriginal, kernelDi, 1)
 
                         for x in range(0,goodRects[i][2]):
@@ -230,59 +229,45 @@ class detectSkin:
                         handNoBGGray2 = cv.CreateImage((goodRects[i][2],goodRects[i][3]), 8, 1)
                         
                         # find contours for blobs
-                        storageHand = cv.CreateMemStorage()
-                        handBlobs = cv.FindContours(handNoBGGray2, storageHand, cv.CV_RETR_EXTERNAL);
+#                        storageHand = cv.CreateMemStorage()
+#                        handBlobs = cv.FindContours(handNoBGGray2, storageHand, cv.CV_RETR_EXTERNAL);
 
-                        biggestHand  = 0
+                        biggestHand  = 1
                         bestHandX    = 0
                         bestHandY    = 0
                         bestHandW    = 0
                         bestHandH    = 0
+                        handHW       = 0
                         
-                        while handBlobs:
-                            seqRect = cv.BoundingRect(handBlobs)
-                            x = seqRect[0]
-                            y = seqRect[1]
-                            w = seqRect[2]
-                            h = seqRect[3]
+                        if biggestHand!=0:
+                            #if blob of hand if found
+                            bestHandX  = 0
+                            bestHandY  = 0
+                            bestHandW  = goodRects[i][2]
+                            bestHandH  = goodRects[i][3]
+
+                            handHW     = max(bestHandH,bestHandW)
                             
-                            if w>=20 and h>=20:
-                                if w*h>biggestHand:
-                                    biggestHand=w*h
-                                    bestHandX  = x
-                                    bestHandY  = y
-                                    bestHandW  = w
-                                    bestHandH  = h
+                            handSquare = cv.CreateImage((handHW,handHW), 8, 1)
 
-                            handBlobs = handBlobs.h_next()
+                            xStart = int((handHW-bestHandW)/2)
+                            xEnd   = handHW - int((handHW-bestHandW)/2)-1
+                            yStart = int((handHW-bestHandH)/2)
+                            yEnd   = handHW - int((handHW-bestHandH)/2)-1
+                            
+                            for y in range(0,handHW):
+                                for x in range(0,handHW):
+                                    if y>=yStart and y<yEnd and x>=xStart and x<xEnd:
+                                        handSquare[y,x] = handNoBGGray[y-yStart+bestHandY,x-xStart+bestHandX]
+                                    else:
+                                        handSquare[y,x] = 0
 
-                        handHW     = max(bestHandH,bestHandW)
+                            hand70x70 = cv.CreateImage((70,70), 8, 1)
+                            cv.Resize(handSquare,hand70x70,cv.CV_INTER_LINEAR)
+                            cv.ShowImage("handSquare", hand70x70) #hand
 
-                        handSquare = cv.CreateImage((handHW,handHW), 8, 1)
-
-                        xStart = int((handHW-bestHandW)/2)
-                        xEnd   = handHW - int((handHW-bestHandW)/2)
-                        yStart = int((handHW-bestHandH)/2)
-                        yEnd   = handHW - int((handHW-bestHandH)/2)
-                        
-#                        print "area w:    ",bestHandW,"  and    h: ",bestHandH
-#                        print "x: start > ",xStart,   "  and end > ",xEnd
-#                        print "y: start > ",yStart,   "  and end > ",yEnd
-
-#                        print "wh hand: ",handNoBGGray.width," en ",handNoBGGray.height
-#                        print "wh squa: ",handSquare.width," en ",handSquare.height
-
-                        for y in range(0,handHW):
-                            for x in range(0,handHW):
-                                if y>=yStart and y<yEnd and x>=xStart and x<xEnd:
-                                    handSquare[y,x] = handNoBGGray[y-yStart+bestHandY,x-xStart+bestHandX]
-                                else:
-                                    handSquare[y,x] = 0
-
-                        hand70x70 = cv.CreateImage((70,70), 8, 1)
-                        cv.Resize(handSquare,hand70x70,cv.CV_INTER_LINEAR)
                         cv.ShowImage("hand1", handNoBGGray) #hand
-                        cv.ShowImage("handSquare", hand70x70) #hand
+                        
                     cv.ResetImageROI(skinProbImgOriginal);
 
                 t = cv.GetTickCount() - t
@@ -293,6 +278,6 @@ class detectSkin:
                     break
 
 if __name__ == '__main__':
-#    cProfile.run('detectSkin()')
-    detectSkin()
+    cProfile.run('detectSkin()')
+#    detectSkin()
     
