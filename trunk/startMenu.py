@@ -89,7 +89,7 @@ elif(int(choice) == 8):
 	dataset = raw_input('classify h => hands vs garbage; c => rock & paper & scissors ...')	
 	datas   = {'c':'rock', 'h':'hands'} 
 	typeu   = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
-	predict = predictSign(int(sizeImg))
+	predict = predictSign(int(sizeImg),True)
 	predict.storeModel("knn", datas[dataset], int(typeu))
 	
 
