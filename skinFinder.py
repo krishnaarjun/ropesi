@@ -9,13 +9,13 @@ class detectSkin:
     def __init__(self):
 	#load the model of the classification
 	self.predict = predictSign(70, False) # takes the size of the images as input
-	problem_sign = self.predict.loadModel("knn", 1, "rock") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
 	problem_hand = self.predict.loadModel("knn", 1, "hands") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
+	problem_sign = self.predict.loadModel("knn", 1, "rock") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
 	self.goalImg = cv.CreateImage((70,70), cv.IPL_DEPTH_8U, 1)
 
 	#skin detector from now on 
         capture = cv.CreateCameraCapture(int(0))
-        cascade = cv.Load("haarcascades\haarcascade_frontalface_alt.xml")
+        cascade = cv.Load("haarcascades/haarcascade_frontalface_alt.xml")
         
         frameCount  = 0
         totalTime   = 0
