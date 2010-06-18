@@ -2,8 +2,8 @@
 # Classifies between the signs in order to distinguish between the 3 signs
 #
 # Input:
-# - pca = an object of the class "eigenHands" 
-#
+# - pca  = an object of the class "eigenHands" 
+# - size = size of the images
 # Output:
 # - mergeLists(list1, list2)            => merges 2 lists: [list1, list2]
 # - classifySVN(noComp,onImg,theSign)   => classifies hands from non-hands using the eigenHands defined by the "noComp" for the data given by "theSign" 
@@ -32,8 +32,8 @@ import mlpy
 from eigenHands import *
 from numpy.random import shuffle
 class classifyHands:
-	def __init__(self, makeData):
-		self.pca = eigenHands()
+	def __init__(self, makeData, size):
+		self.pca = eigenHands(size)
 		#create the data matrix if they are not there
 		if(makeData == True):
 	    		self.pca.makeMatrix("garb")
@@ -43,7 +43,7 @@ class classifyHands:
 	    		self.pca.makeMatrix("scissors")
 	#________________________________________________________________________
 	#get the training set and the labels 
-	def getDataLabels(self, noComp, onImg, theSign, isMulti):
+	def getDataLabels(self, onImg, theSign, isMulti):
 		if(isMulti == True):
 			signs = {"hands":["garb"], "rock":["paper", "scissors"]}
 		else:
@@ -52,20 +52,22 @@ class classifyHands:
 		if(onImg == 1):
 			good = self.pca.justGetDataMat(theSign)
 		elif(onImg == 2):
-			zaData   = self.pca.justGetDataMat(theSign)
-			good,_,_ = self.pca.doPCA(zaData, noComp, -1)	
+			good = self.pca.justGetDataMat(theSign+"Pca")
 		elif(onImg == 3):
 			good = self.pca.justGetDataMat(theSign+"Conv")
+		elif(onImg == 4):
+			good = self.pca.justGetDataMat(theSign+"ConvLarge")
 		bad     = []
 		badSize = 0
 		for aSign in signs[theSign]:
 			if(onImg == 1):
 				preBad = self.pca.justGetDataMat(aSign)
 			elif(onImg == 2):
-				zaData     = self.pca.justGetDataMat(aSign)
-				preBad,_,_ = self.pca.doPCA(zaData, noComp, -1)			 	
+				preBad = self.pca.justGetDataMat(aSign+"Pca")
 			elif(onImg == 3):
 				preBad = self.pca.justGetDataMat(aSign+"Conv")
+			elif(onImg == 4):
+				preBad = self.pca.justGetDataMat(aSign+"ConvLarge")
 			badSize += preBad.shape[0]
 			bad.append(preBad)
 		labels    = numpy.ones(good.shape[0]+badSize, dtype=int)
@@ -93,11 +95,11 @@ class classifyHands:
 
 	#________________________________________________________________________
 	#classify images using svm
-	def classifySVM(self, noComp, onImg, theSign):
+	def classifySVM(self, onImg, theSign):
 		#0) get training data data and the labels
-		indexs,labels,train = self.getDataLabels(noComp, onImg, theSign, False)
+		indexs,labels,train = self.getDataLabels(onImg, theSign, False)
 
-		#2) initialize the svm and compute the model
+		#1) initialize the svm and compute the model
 		if(onImg == 1): #for full images 		
 			problem = mlpy.Svm(kernel='gaussian', C=1.0, kp=0.1, tol=0.001, eps=0.001, maxloops=1000, opt_offset=True)
 		elif(onImg == 2): #for PCAed images
@@ -123,16 +125,16 @@ class classifyHands:
 			pred_err         += mlpy.err(testLab, prediction)
 			print pred_err
 		avg_err = float(pred_err)/float(len(folds))
-		print "\nAverage error over 10 folds:"+str(avg_err)
+		print "\nAverage error over 50 folds:"+str(avg_err)
 		return problem
 	#________________________________________________________________________
 	#classify images using KNN
-	def classifyKNN(self, noComp, onImg, theSign):
+	def classifyKNN(self, onImg, theSign, neighbors):
 		#0) get training data data and the labels
-		indexs,labels,train = self.getDataLabels(noComp, onImg, theSign, True)
+		indexs,labels,train = self.getDataLabels(onImg, theSign, True)
 
-		#2) initialize the svm and compute the model
-		problem = mlpy.Knn(10, dist='se')
+		#1) initialize the svm and compute the model
+		problem = mlpy.Knn(neighbors, dist='se')
 
 		#2) shuffle input data to do the 10-fold split 
 		shuffle(indexs)
@@ -142,7 +144,7 @@ class classifyHands:
 		#3) define the folds, train and test
 		pred_err = 0.0
 		fold_ind = 0
-		folds    = self.myFolds(labels, [1,2,3], 50)
+		folds    = self.myFolds(labels, [1,2,3], 20)
 		for (trainI,testI) in folds:
 			fold_ind += 1
 			trainSet, testSet = train[trainI], train[testI]
@@ -161,7 +163,7 @@ class classifyHands:
 	    		totalTime += zaTime/(cv.GetTickFrequency()*1000.0*float(len(testLab)))
 			print "cumulative error %f >>> prediction time/image %gms" % (pred_err, totalTime)                	
 		avg_err = float(pred_err)/float(len(folds))
-		print "\nAverage error over 50 folds:"+str(avg_err)
+		print "\nAverage error over 20 folds:"+str(avg_err)
 		return problem
 	#________________________________________________________________________
 	#implements k bolds for multiple classes 
