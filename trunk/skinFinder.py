@@ -3,12 +3,21 @@ import cv
 from PIL import *
 from hs_histogram import *
 import cProfile
+from predictSign import *
 
 class detectSkin:
     def __init__(self):
+	#load the model of the classification
+	self.predict = predictSign(70) # takes the size of the images as input
+	problem      = self.predict.loadModel("knn", 1) # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
+	self.goalImg = cv.CreateImage((70,70), cv.IPL_DEPTH_8U, 1)
+
+	#skin detector from now on 
         capture = cv.CreateCameraCapture(int(0))
         cascade = cv.Load("haarcascades\haarcascade_frontalface_alt.xml")
         
+        frameCount  = 0
+        totalTime   = 0
         frameCount  = 0
         totalTime   = 0
         imageResize = 0.5
@@ -100,6 +109,9 @@ class detectSkin:
                 totalTime += t/(cv.GetTickFrequency()*1000.)
                 if frameCount%10==0:
                     print "after %i frames the average time = %gms" % (frameCount, totalTime/frameCount)
+
+		#does the prediction on the given image of hand
+		self.predict.doPrediction(1, "knn", problem, "rock", self.goalImg)
                 if cv.WaitKey(10) >= 0:
                     break
 
@@ -302,7 +314,7 @@ class detectSkin:
 
             hand70x70 = cv.CreateImage((70,70), 8, 1)
             cv.Resize(handSquare,hand70x70,cv.CV_INTER_LINEAR)
-
+	    self.goalImg = hand70x70	
             return hand70x70
                     
 if __name__ == '__main__':
