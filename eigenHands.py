@@ -1,7 +1,7 @@
 # Class that get the eigen hands out of a video with hands and stores them
 #
 # Input:
-# - -- 
+# - sizeImg                => the size of the images to be used 
 # Output:
 # - makeMatrix(dir)        => creates an matrix-image out of a set of images from a directory "dir"
 # - justGetDataMat(what)   => just returns the stored data as a numpy.array instead of a cv.Mat corresponding to "what" (hands,rock,paper,scissors)
@@ -24,9 +24,8 @@ import os
 import glob
 #from PIL import Image
 class eigenHands:
-	def __init__(self):
-		self.sizeImg = 70
-		"""Nothing ;)"""
+	def __init__(self, size):
+		self.sizeImg = size
 	#________________________________________________________________________
 	#store the images from the input file/files into a huge cv.Image-matrix	
 	def makeMatrix(self, fold):
@@ -57,15 +56,15 @@ class eigenHands:
 			cv.WaitKey()"""
 
 			anIndex += 1		
-		cv.Save("data_train/"+fold+"Train.dat", imgMatrix)	
+		cv.Save("data_train/"+fold+"Train"+str(self.sizeImg)+".dat", imgMatrix)	
 	#________________________________________________________________________
 	#just read the cvMat of data and transforms it to a numpy matrix 
 	def justGetDataMat(self, what):
-		mat = cv.Load("data_train/"+what+"Train.dat")
+		mat = cv.Load("data_train/"+what+"Train"+str(self.sizeImg)+".dat")
 		return self.cv2array(mat,True)
 	#________________________________________________________________________
 	#perform PCA on set of all images from matName
-	def doPCA(self, X, noComp, showIm):
+	def doPCA(self, X, noComp, showIm, sign):
 		#1) extract the mean of the images out of each image
 		nr,dim = X.shape
 		meanX  = X.mean(axis=0)
@@ -95,9 +94,10 @@ class eigenHands:
 			cv.WaitKey()       
 
 		#4) return the projection-matrix, eigen-values and the mean
-		cvData  = hands.array2cv((ui[0:noComp,:]).T, True)	
-		cv.Save("data_train/"+fold+"TrainPCA.dat", cvData)	
-		return (ui[0:noComp,:]).T,X,meanX
+		if(len(sign)>0):
+			cvData = self.array2cv(projX, False)
+			cv.Save("data_train/"+str(sign)+"PcaTrain"+str(self.sizeImg)+".dat", cvData)	
+		return ui[0:noComp,:].T, X, meanX
 	#________________________________________________________________________
 	#covert an cvMatrix / cvImage to a numpy.array 	
 	def cv2array(self, im, isImg):
