@@ -123,7 +123,7 @@ class predictSign:
 		prediction = problem.predict(testImg)
 		zaTime     = cv.GetTickCount() - zaTime
 	    	totalTime += zaTime/(cv.GetTickFrequency()*1000.0)
-		if(what != "hands"):	
+		if((what!="hands") or (prediction[0]==0 and what=="hands")):	
 			print "it is a..."+str(classifyWhat[str(what)][str(prediction[0])])+" >>> prediction time/image %gms" % totalTime
 		return prediction[0]
 	#________________________________________________________________________
