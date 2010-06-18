@@ -1,6 +1,7 @@
 # Convolve an image with a Gabor filter and return the resulted marix for all images to be classified
 #
 # Input:
+# - size   => the size of the images to be considered
 # - lambda => wavelength between 2 and 256
 # - theta  => the orientation specified in degreees; valid values between 0 and 180
 # - psi    => phase offset of the cosine factor; valid values between -180  and 180
@@ -29,8 +30,8 @@ import glob
 import mlpy
 from eigenHands import *
 class gaborFilters:
-	def __init__(self, makeData):
-		self.pca = eigenHands()
+	def __init__(self, makeData, size):
+		self.pca   = eigenHands(size)
 		self.lambd = None
 		self.gamma = None
 		self.psi   = None
@@ -81,7 +82,6 @@ class gaborFilters:
 			print "press any key .."
 			cv.WaitKey()
 		wavelet = self.pca.array2cv(gabor, False)
-		print gabor.shape      		
 		return gabor,wavelet
 	#________________________________________________________________________
 	#covolve an the images with gabor a given filter
@@ -93,14 +93,14 @@ class gaborFilters:
 			for j in range(0, data.width):
 				dataVect[0,j] = data[i,j] 
 			reshData = cv.Reshape(dataVect, 0, self.pca.sizeImg)
-			if(isPrint == True and i==3):
+			if(isPrint == True and i==0):
 				cv.NamedWindow("img", 1)
 				cv.ShowImage("img", reshData)
 			cv.Filter2D(reshData,reshData,wavelet)	
 			temp = cv.Reshape(reshData, 0, 1)		
 			for j in range(0,temp.width):			
 				finalData[i,j] = temp[0,j]
-			if(isPrint == True and i==3):
+			if(isPrint == True and i==0):
 				cv.NamedWindow("response", 1)
 				cv.ShowImage("response", reshData)
 				print "press any key.."+str(i)
