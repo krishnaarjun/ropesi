@@ -9,7 +9,8 @@
 # - classifySVN(noComp,onImg,theSign)   => classifies hands from non-hands using the eigenHands defined by the "noComp" for the data given by "theSign" 
 #					   "onImg" -- 1 for the reshaped image to DxD
 #					   	   -- 2 for the image with PCA
-#						   -- 3 for the image convolved with a Gabor-Wavelet                             
+#						   -- 3 for the convolved Gabors + original image         
+#						   -- 4 for the convolved Gabors                    
 # - classifyKNN(noComp, onImg, theSign) => classifies hands like above using Knn	 	 		
 # - getDataLabels(noComp,onImg,theSign, => returns data-set and labels corresponding to the option "onImg"; 
 #	isMulti) 	                   "theSign" -- is "hands" for hands vs no-hands
