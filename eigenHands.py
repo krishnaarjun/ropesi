@@ -81,11 +81,11 @@ class eigenHands:
 			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))
 		ui = ui[:,indxs] #sort the eigenvectors of (X * X.T)/N by the eigenvalues (ui and vi have the same eigenvalues => li)
 
-		#3) do projection on first N components: [N,4900]x[4900,?] => [N,?] 
+		#3) do projection on first "?" components: [N,4900]x[4900,?] => [N,?] 
 		projX  = numpy.dot(X, ui[:,0:noComp])
 		print projX.shape
 		if(showIm == True):
-			#4) do back-projection on first N components to check: [N,?]x[?,4900] => [N,4900] 
+			#4) do back-projection on first "?" components to check: [N,?]x[?,4900] => [N,4900] 
 			backX = numpy.dot(projX, ui[:,0:noComp].T)
 			for i in range(0, nr):
 				backX[i,:] += meanX
