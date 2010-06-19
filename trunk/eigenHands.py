@@ -75,16 +75,17 @@ class eigenHands:
 		#   ui[:,i] = (X.T * vi)/norm(ui[:,i])
 		otherS = numpy.dot(X, X.T) #compute: (X * X.T)
 		li,vi  = numpy.linalg.eigh(otherS) #eigenvalues and eigenvectors of (X * X.T)/N
-		vi     = vi[:,::-1] #reverse since last eigenvectors are the ones we want
-		li     = li[::-1] #reverse since eigenvalues are in increasing order	
-		ui     = numpy.dot(X.T, vi) #the formula for the highdim data	
+		indxs  = numpy.argsort(li) 
+ 		vi     = vi[indxs] #sort the eigenvalues of (X * X.T)/N by the indexs
+		ui     = numpy.dot(X.T, vi) #the formula for the highdim data
 		for i in range(0, nr): #normalize the final eigenvectors
 			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))
-	
-		#3) do projection/back-projection on first N components to check
+		#3) do projection on first N components: [N,4900]x[4900,?] => [N,?] 
+		projX  = numpy.dot(X, ui[:,0:noComp])
+		print projX.shape
 		if(showIm == True):
-			projX = numpy.dot(ui[0:noComp,:], X)
-			backX = numpy.dot(ui[0:noComp,:].T, projX)
+			#4) do back-projection on first N components to check: [N,?]x[?,4900] => [N,4900] 
+			backX = numpy.dot(projX, ui[:,0:noComp].T)
 			for i in range(0, nr):
 				backX[i] += meanX
 			eigenHand = self.array2cv(backX,True)
@@ -97,7 +98,7 @@ class eigenHands:
 		if(len(sign)>0):
 			cvData = self.array2cv(projX, False)
 			cv.Save("data_train/"+str(sign)+"PcaTrain"+str(self.sizeImg)+".dat", cvData)	
-		return ui[0:noComp,:].T, X, meanX
+		return projX, X, meanX
 	#________________________________________________________________________
 	#covert an cvMatrix / cvImage to a numpy.array 	
 	def cv2array(self, im, isImg):
