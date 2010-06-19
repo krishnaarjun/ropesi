@@ -72,14 +72,15 @@ class eigenHands:
 			X[i,:] -= meanX
 		
 		#2) compute the projection matrix: (X * X.T) * vi = li * vi
-		#   ui[:,i] = (X.T * vi)/norm(ui[:,i])
+		#compute: ui[:,i] = (X.T * vi)/norm(ui[:,i])
 		otherS = numpy.dot(X, X.T) #compute: (X * X.T)
 		li,vi  = numpy.linalg.eigh(otherS) #eigenvalues and eigenvectors of (X * X.T)/N
 		indxs  = numpy.argsort(li) 
- 		vi     = vi[indxs] #sort the eigenvalues of (X * X.T)/N by the indexs
 		ui     = numpy.dot(X.T, vi) #the formula for the highdim data
 		for i in range(0, nr): #normalize the final eigenvectors
 			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))
+		ui = ui[:,indxs] #sort the eigenvalues of (X * X.T)/N by the indexs (ui and vi have the same eigen values => li)
+
 		#3) do projection on first N components: [N,4900]x[4900,?] => [N,?] 
 		projX  = numpy.dot(X, ui[:,0:noComp])
 		print projX.shape
