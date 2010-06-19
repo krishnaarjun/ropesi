@@ -79,7 +79,7 @@ class eigenHands:
 		ui     = numpy.dot(X.T, vi) #the formula for the highdim data
 		for i in range(0, nr): #normalize the final eigenvectors
 			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))
-		ui = ui[:,indxs] #sort the eigenvalues of (X * X.T)/N by the indexs (ui and vi have the same eigen values => li)
+		ui = ui[:,indxs] #sort the eigenvectors of (X * X.T)/N by the eigenvalues (ui and vi have the same eigenvalues => li)
 
 		#3) do projection on first N components: [N,4900]x[4900,?] => [N,?] 
 		projX  = numpy.dot(X, ui[:,0:noComp])
@@ -88,7 +88,7 @@ class eigenHands:
 			#4) do back-projection on first N components to check: [N,?]x[?,4900] => [N,4900] 
 			backX = numpy.dot(projX, ui[:,0:noComp].T)
 			for i in range(0, nr):
-				backX[i] += meanX
+				backX[i,:] += meanX
 			eigenHand = self.array2cv(backX,True)
 			cv.NamedWindow("PCA", 1)
 			cv.ShowImage("PCA", cv.Reshape(eigenHand[0], 0, self.sizeImg))
