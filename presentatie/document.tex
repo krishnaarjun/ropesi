@@ -29,7 +29,7 @@
 	\item learn a model for hand gestures of rock, paper and scissors 
 	\item extract hand from web cam stream 
 	\item Classify extracted hand
-	\item decide who won, based on the classification
+	\item Make Nao make rock!paper!scissors! moves and play the game
 	\end{itemize}
 	\vspace*{10px}
 }
@@ -59,14 +59,27 @@
 		\item KNN
         \end{itemize}
     \vspace*{9px}
-	\item Get this running on Nao\\
+	\item Get this running on Nao
 	\end{enumerate}
 }
 
 \subsection{Extracting hand from the frames}
 \frame{
   \frametitle{Extracting hand from the frames}
-  This whole process will be shown with images
+  Naive approach (as shown in a lot of papers)
+	\begin{itemize}
+	\item determin hue and saturation values for skin color
+	\item threshold the image with hue and saturation values
+	\item erode \& dilate
+	\item find hand ares\\
+	\item this approach is very sensitive for background noise. Don't do this!
+	waste of time!!
+    \end{itemize}
+}
+
+\frame{
+  \frametitle{Extracting hand from the frames}
+  Smart solution:
 	\begin{itemize}
 	\item determin skin color histogram
 		\begin{itemize}
@@ -74,13 +87,15 @@
 		\item build histogram of inside of face
 	    \end{itemize}
 	\item backproject skin color histogram on hole frame
-	\item erode/dilate to loose noise and fill up holes
+	\item erode\&dilate to loose noise and fill up holes
 	\item extract area of hand
-	\item more sophisticated erotion/dilation on hand area
+	\item more sophisticated erotion\&dilation on hand area
 		\begin{itemize}
 		\item keep only hand and get rid of background
 		\item resize to 70x70
-	    \end{itemize}
+        \end{itemize}
+	\item skin color is adapted to user
+	\item to some extent scale invariant
     \end{itemize}
 }
 
@@ -96,6 +111,7 @@
 		\begin{itemize}
 		\item Some mambo jambo formulas ;)
 	    \end{itemize}
+	\item PCA on concatianted Gabor filters
     \end{itemize}
 }
 
@@ -103,7 +119,7 @@
 \frame{
   \frametitle{Learn classifier for rock, paper and scissors gestures}
 	\begin{itemize}
-	\item SVN
+	\item SVM
 	\item KNN
     \end{itemize}
     on raw images, PCA and gabor filter response
