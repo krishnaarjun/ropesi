@@ -33,7 +33,8 @@ import mlpy
 from eigenHands import *
 from gaborFilters import *
 class preprocessing:
-	def __init__(self, size):
+	def __init__(self, size, noComp):
+		self.noComp         = noComp
 		self.default_width  = 640
 		self.default_height = 480
 		self.rescale_ratio  = 5
@@ -80,95 +81,107 @@ class preprocessing:
        	 			break
 	#________________________________________________________________________
 	#prepare the data with multiple Gabor filters for SVM
-	def doManyGabors(self, data, theSign, noComp, gaborComp, isPrint, isPCA):
-		#1) get the initial cv.Images 
-		if(isPCA == False):
-			noComp = data.width
+	def doManyGabors(self, data, txtLabels, theSign, isPCA):
+		signs = {"h":["hands", "garb"], "c":["rock", "paper", "scissors"]}
 
-		#2) compute a set of different gabor filters
+		#1) compute a set of different gabor filters
 		lambdas = 4.0 #between 2 and 256
 		gammas  = 0.7 # between 0.2 and 1 
 		psis    = 20 #between 0 and 180 
-		thetas  = [0,(numpy.pi/6.0),(numpy.pi/4.0),(numpy.pi*2.0/6.0),(numpy.pi/2.0),(numpy.pi*4.0/6.0),(numpy.pi*3.0/4.0),(numpy.pi*5.0/6.0)] #between (0 and 180) or (-90 and +90)
+		thetas  = [0,(numpy.pi/4.0),(numpy.pi/2.0),(numpy.pi*3.0/4.0)] #between (0 and 180) or (-90 and +90)
 		if(self.pca.sizeImg == 20):
-			sigmas  = 2.0 #between 3 and 68
-			sizes   = 1.0 #between 1 and 10
+			sigmas = 2.0 #between 3 and 68
+			sizes  = 1.0 #between 1 and 10
 		else:
-			sigmas  = 3.0 #between 3 and 68
-			sizes   = 2.0 #between 1 and 10
-		convo   = numpy.empty((data.height, noComp * len(thetas)), dtype=float)
+			sigmas = 3.0 #between 3 and 68
+			sizes  = 2.0 #between 1 and 10
+
+		#2) loop over all gabor kernels
+		convo = numpy.empty((data.shape[0], self.noComp * len(thetas)), dtype=float)		
 		for i in range(0, len(thetas)):
 			#3) convolve the images with the gabor filters
 			self.gabor.setParameters(lambdas, gammas, psis, thetas[i], sigmas, sizes)
-			convolved = self.gabor.convolveImg(data,isPrint)
+			convolved = self.gabor.convolveImg(self.pca.array2cv(data,True),True)
 
-			#4) do PCA on each convolved image
-			if(isPCA == True):
-				preConv     = self.pca.cv2array(convolved,True)
-				convPCA,_,_ = self.pca.doPCA(preConv, noComp, -1, "")	
-			else:
-				convPCA = self.pca.cv2array(convolved,True)
-			for j in range(0, data.height):
-				for k in range(0, noComp):
-					convo[j,(i*noComp)+k] = convPCA[j,k]
-			
+			#4) concatenate the concolved images with the original stuff on each line
+			preConv = self.pca.cv2array(convolved,True)
+			for j in range(0, data.shape[0]):
+				for k in range(0, self.noComp):
+					convo[j,(i*self.noComp)+k] = preConv[j,k]
+		
 		#5) do PCA on the concatenated convolved images 
-		if(isPCA == True):
-			preToSVM,_,_ = self.pca.doPCA(convo, gaborComp, -1, "")
-			toSVM        = self.pca.array2cv(preToSVM, False)
+		if(isPCA == True): #not the test image
+			print "does PCA"
+			if(data.shape[0]>1):
+				self.pca.doPCA(convo, self.noComp, "Gabor/")
 		else:
-			preToSVM = convo
-			toSVM    = self.pca.array2cv(convo, False)
-		if(data.height>1):	
-			cv.Save("data_train/"+theSign+"ConvLargeTrain"+str(self.pca.sizeImg)+".dat", toSVM)
-		return preToSVM
+			finalConv = self.pca.projPCA(convo, False, "Gabor/", "")
+
+		#6) split the set corresponding to labels and store it
+		if(data.shape[0]>1): #not the test image			
+			for aSign in signs[theSign]:
+				signPart = txtLabels[aSign]
+				signSet  = convo[signPart,:]
+				if(isPCA == True):
+					finalConv = self.pca.projPCA(signSet, False, "Gabor/", "")
+					cv.Save("data_train/Gabor/"+aSign+"Train"+str(self.pca.sizeImg)+".dat", self.pca.array2cv(finalConv,False))
+				else:
+					cv.Save("data_train/Gabor/"+aSign+"Train"+str(self.pca.sizeImg)+".dat", self.pca.array2cv(signSet,False))
+		return finalConv
 	#________________________________________________________________________
 	#prepare the data with multiple Gabor filters for SVM
-	def doSmallManyGabors(self, data, theSign, noComp, isPrint, isPCA):
-		#1) get the initial cv.Images 
-		if(isPCA == False):
-			noComp = data.width
+	def doSmallManyGabors(self, data, txtLabels, theSign, isPCA):
+		signs = {"h":["hands", "garb"], "c":["rock", "paper", "scissors"]}
 		
-		#2) compute a set of different gabor filters
+		#1) compute a set of different gabor filters
 		lambdas = 4.0 #between 2 and 256
 		gammas  = 0.8 # between 0.2 and 1 
 		psis    = 20 #between 0 and 180 
-		thetas  = [0,(numpy.pi/6.0),(numpy.pi/4.0),(numpy.pi*2.0/6.0),(numpy.pi/2.0),(numpy.pi*4.0/6.0),(numpy.pi*3.0/4.0),(numpy.pi*5.0/6.0)] #between (0 and 180) or (-90 and +90)
+		thetas  = [0,(numpy.pi/4.0),(numpy.pi/2.0),(numpy.pi*3.0/4.0)] #between (0 and 180) or (-90 and +90)
 		if(self.pca.sizeImg == 20):
-			sigmas  = 2.0 #between 3 and 68
-			sizes   = 1.0 #between 1 and 10
+			sigmas = 2.0 #between 3 and 68
+			sizes  = 1.0 #between 1 and 10
 		else:
-			sigmas  = 3.0 #between 3 and 68
-			sizes   = 2.0 #between 1 and 10
-		convo   = numpy.empty((data.height, data.width*(len(thetas)+1)), dtype=float)
-	
-		#3) store the image as a line at each begining of the row
-		dataNumpy = self.pca.cv2array(data, True)
-		for j in range(0, dataNumpy.shape[0]):
-			for k in range(0, dataNumpy.shape[1]):
-				convo[j,k] = dataNumpy[j,k]
+			sigmas = 3.0 #between 3 and 68
+			sizes  = 2.0 #between 1 and 10
 
+		#2) store each image as a line at each begining of the row
+		convo = numpy.empty((data.shape[0], data.shape[1]*(len(thetas)+1)), dtype=float)
+		for j in range(0, data.shape[0]):
+			for k in range(0, data.shape[1]):
+				convo[j,k] = data[j,k]
+
+		#3) loop over all kernels and convolve them with the images
 		for i in range(0, len(thetas)):
 			#4) convolve the images with the gabor filters
 			self.gabor.setParameters(lambdas, gammas, psis, thetas[i], sigmas, sizes)
-			convolved = self.gabor.convolveImg(data,isPrint)
+			convolved = self.gabor.convolveImg(self.pca.array2cv(data,False),True)
 
 			#5) concatenate the concolved images with the original image on each line
-			convNumpy = self.pca.cv2array(convolved, True)
-			for j in range(0, data.height):
-				for k in range(0, data.width):
-					convo[j,((i+1)*data.width)+k] = convNumpy[j,k]
+			convNumpy = self.pca.cv2array(convolved,True)
+			for j in range(0, data.shape[0]):
+				for k in range(0, data.shape[1]):
+					convo[j,((i+1)*data.shape[1])+k] = convNumpy[j,k]
 			
 		#5) do PCA on the concatenated (convolved+original) images 
-		if(isPCA == True):
-			preToSVM,_,_ = self.pca.doPCA(convo, noComp, -1, "")
-			toSVM        = self.pca.array2cv(preToSVM, False)
+		if(data.shape[0]>1 and isPCA == True): #not the test image					
+			self.pca.doPCA(convo, self.noComp, "GaborImg/")
 		else:
-			preToSVM = convo
-			toSVM    = self.pca.array2cv(convo, False)		
-		if(data.height>1):	
-			cv.Save("data_train/"+theSign+"ConvTrain"+str(self.pca.sizeImg)+".dat", toSVM)
-		return preToSVM
+			finalConv = self.pca.projPCA(convo, False, "GaborImg/", "")
+
+		#6) split the set corresponding to labels and store it
+		if(data.shape[0]>1): #not the test image
+			for aSign in signs[theSign]:
+				signPart = txtLabels[aSign]
+				signSet  = convo[signPart,:]
+
+				if(isPCA == True):
+					#project only what i need out of convo
+					finalConv = self.pca.projPCA(signSet, False, "GaborImg/", "")
+					cv.Save("data_train/GaborImg/"+aSign+"Train"+str(self.pca.sizeImg)+".dat", self.pca.array2cv(finalConv,False))
+				else:
+					cv.Save("data_train/GaborImg/"+aSign+"Train"+str(self.pca.sizeImg)+".dat", self.pca.array2cv(signSet,False))
+		return finalConv
 #____________________________________________________________________________________________
 
 
