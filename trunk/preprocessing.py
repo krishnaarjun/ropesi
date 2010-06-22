@@ -82,6 +82,8 @@ class preprocessing:
 	#________________________________________________________________________
 	#prepare the data with multiple Gabor filters for SVM
 	def doManyGabors(self, data, txtLabels, theSign, isPCA):
+		if(isPCA != True):
+			self.noComp = data.shape[1] 
 		signs = {"h":["hands", "garb"], "c":["rock", "paper", "scissors"]}
 
 		#1) compute a set of different gabor filters
@@ -156,7 +158,7 @@ class preprocessing:
 		for i in range(0, len(thetas)):
 			#4) convolve the images with the gabor filters
 			self.gabor.setParameters(lambdas, gammas, psis, thetas[i], sigmas, sizes)
-			convolved = self.gabor.convolveImg(self.pca.array2cv(data,False),False)
+			convolved = self.gabor.convolveImg(self.pca.array2cv(data,True),False)
 
 			#5) concatenate the concolved images with the original image on each line
 			convNumpy = self.pca.cv2array(convolved,True)
