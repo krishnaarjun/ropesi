@@ -43,11 +43,11 @@ from preprocessing import *
 from classifyHands import *
 
 class predictSign:
-	def __init__(self, size, makeData):
+	def __init__(self, size, makeData, noComp):
 		self.pca      = eigenHands(size)
 		self.gabor    = gaborFilters(False, size)
 		self.classify = classifyHands(False, size)
-		self.prep     = preprocessing(size)
+		self.prep     = preprocessing(size, noComp)
 		if(makeData == True):
 	    		self.pca.makeMatrix("garb")
 	    		self.pca.makeMatrix("hands")
@@ -88,7 +88,7 @@ class predictSign:
 				indexs,labels,train = self.classify.getDataLabels(onImg, theSign, False)
 
 			#1) initialize the svm and compute the model
-			problem = mlpy.Knn(5, dist='se')
+			problem = mlpy.Knn(3, dist='se')
 
 			#2) shuffle input data to do the 10-fold split 
 			shuffle(indexs)
@@ -136,15 +136,18 @@ class predictSign:
 		imgMat = cv.Reshape(resizeImg, 0, 1)
 
 		if(zaType == 1): # original images
-			numpyImg = self.pca.cv2array(imgMat, True)
-			return numpyImg
+			return self.pca.cv2array(imgMat,True)
 		elif(zaType == 2): # PCA over the original images
-			"""do pca on 1 image somehow"""
-		elif(zaType == 3): # convolve with 8 kernels and add the original image
-			return self.prep.doSmallManyGabors(imgMat, "", 0, False, False)
-		elif(zaType == 4): # convolve with 8 kernels and add the original image
-			return self.prep.doManyGabors(imgMat, "", 0, 0, False, False)
-	
+			return self.pca.projPCA(self.pca.cv2array(imgMat,True), False, "PCA/", "")		
+		elif(zaType == 3): # convolve with 8 kernels and add the original image NO PCA
+			return self.prep.doSmallManyGabors(pca.cv2array(imgMat,True), None, "",False)	
+		elif(zaType == 4): # convolve with 8 kernels NO PCA
+			return self.prep.doManyGabors(self.pca.cv2array(imgMat,True), None, "",False)			
+		elif(zaType == 5): # convolve with 8 kernels and add the original image and PCA
+			return self.prep.doManyGabors(self.pca.cv2array(imgMat,True), None, "",True)
+		elif(zaType == 4): # convolve with 8 kernels and PCA
+			return self.prep.doManyGabors(self.pca.cv2array(imgMat,True), None, "",True)			
+
 #________________________________________________________________________
 	
 
