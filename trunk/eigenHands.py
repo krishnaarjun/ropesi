@@ -47,29 +47,46 @@ class eigenHands:
 			handsMat = cv.Reshape(resizeImg, 0, 1)
 			for j in range(0,handsMat.width):
 				imgMatrix[anIndex,j] = handsMat[0,j]
-				
-			"""cv.NamedWindow("img", 1)
-			for j in range(0, (self.sizeImg*self.sizeImg)):
-				oneLine[0,j] = imgMatrix[anIndex,j]
-			cv.ShowImage("img",cv.Reshape(oneLine, 0, self.sizeImg))
-			print "press any key.."+str(anIndex)
-			cv.WaitKey()"""
-
 			anIndex += 1		
 		cv.Save("data_train/"+fold+"Train"+str(self.sizeImg)+".dat", imgMatrix)	
 	#________________________________________________________________________
 	#just read the cvMat of data and transforms it to a numpy matrix 
-	def justGetDataMat(self, what):
-		mat = cv.Load("data_train/"+what+"Train"+str(self.sizeImg)+".dat")
-		return self.cv2array(mat,True)
+	def justGetDataMat(self, what, folder, justData):
+		data = self.cv2array(cv.Load("data_train/"+str(folder)+str(what)+"Train"+str(self.sizeImg)+".dat"),True)
+		if(justData == True):
+			return data
+		else:
+			signs = {"rock":["rock","paper","scissors"], "paper":["rock","paper","scissors"], "scissors":["rock","paper","scissors"], "hands":["hands","garb"], "garb":["hands","garb"]}
+			mat   = []
+			rows  = 0
+			cols  = 0 
+			for sign in signs[what]:
+				premat = self.cv2array(cv.Load("data_train/"+str(folder)+str(sign)+"Train"+str(self.sizeImg)+".dat"),True)
+				mat.append(premat)
+				rows += premat.shape[0]
+				cols  = premat.shape[1]
+			finalMat  = numpy.zeros((rows, cols), dtype=float)
+			txtLabels = {}
+			sizeSoFar = 0
+			for i in range(0,len(mat)):
+				for j in range(0,mat[i].shape[0]):
+					k             = (j+sizeSoFar)
+					if(signs[what][i] in txtLabels):					
+						txtLabels[signs[what][i]].append(k)
+					else:
+						txtLabels[signs[what][i]] = []
+					finalMat[k,:] = mat[i][j,:]
+				sizeSoFar += mat[i].shape[0]
+			return data,finalMat,txtLabels 
 	#________________________________________________________________________
 	#perform PCA on set of all images from matName
-	def doPCA(self, X, noComp, showIm, sign):
+	def doPCA(self, X, noComp, folder):
 		#1) extract the mean of the images out of each image
-		nr,dim = X.shape
-		meanX  = X.mean(axis=0)
+		nr,dim   = X.shape
+		meanX    = numpy.empty((1,dim), dtype=float)	
+		meanX[0] = X.mean(axis=0)
 		for i in range(0, nr):
-			X[i,:] -= meanX
+			X[i,:] -= meanX[0,:]
 		
 		#2) compute the projection matrix: (X * X.T) * vi = li * vi
 		#compute: ui[:,i] = (X.T * vi)/norm(ui[:,i])
@@ -77,29 +94,53 @@ class eigenHands:
 		li,vi  = numpy.linalg.eigh(otherS) #eigenvalues and eigenvectors of (X * X.T)/N
 		indxs  = numpy.argsort(li) 
 		ui     = numpy.dot(X.T, vi) #the formula for the highdim data
+
+		#3) normalize the eigenvectors and sort them
 		for i in range(0, nr): #normalize the final eigenvectors
 			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))
 		ui = ui[:,indxs] #sort the eigenvectors of (X * X.T)/N by the eigenvalues (ui and vi have the same eigenvalues => li)
-
+		
+		#4) store the eigenvectors and the mean
+		cvEigen = self.array2cv(ui[:,0:noComp], False)
+		cv.Save("data_train/"+str(folder)+"PcaEigen"+str(self.sizeImg)+".dat", cvEigen)
+		cvMean = self.array2cv(meanX, False)
+		cv.Save("data_train/"+str(folder)+"PcaMean"+str(self.sizeImg)+".dat", cvMean)
+	#________________________________________________________________________
+	#project and verify PCA
+	def projPCA(self, X, showIm, folder, sign):
+		#1) Load the eigenVector and the Mean of the data:
+		eigen = self.cv2array(cv.Load("data_train/"+str(folder)+"PcaEigen"+str(self.sizeImg)+".dat"), False)
+		meanX = self.cv2array(cv.Load("data_train/"+str(folder)+"PcaMean"+str(self.sizeImg)+".dat"), False)
+	
+		#2) Substract the mean of the data
+		for i in range(0, X.shape[0]):
+			X[i,:] -= meanX[0,:]
+		
 		#3) do projection on first "?" components: [N,4900]x[4900,?] => [N,?] 
-		projX  = numpy.dot(X, ui[:,0:noComp])
-		print projX.shape
+		projX = numpy.dot(X, eigen)
+	
+		#5) do back-projection on first "?" components to check: [N,?]x[?,4900] => [N,4900] 
 		if(showIm == True):
-			#4) do back-projection on first "?" components to check: [N,?]x[?,4900] => [N,4900] 
-			backX = numpy.dot(projX, ui[:,0:noComp].T)
-			for i in range(0, nr):
-				backX[i,:] += meanX
-			eigenHand = self.array2cv(backX,True)
-			cv.NamedWindow("PCA", 1)
-			cv.ShowImage("PCA", cv.Reshape(eigenHand[0], 0, self.sizeImg))
+			backX = numpy.dot(projX, eigen.T)
+			for i in range(0, X.shape[0]):
+				backX[i,:] += meanX[0,:] #add the mean back
+			#6) normalize the backprojection
+			mini   = numpy.min(backX)
+			backX += abs(mini)
+			maxi   = numpy.max(backX)
+			backX  = numpy.multiply(backX, float(255)/float(maxi))
+			
+			#7) Shot the backprojected image
+			eigenHand = self.array2cv(backX[0:1,:],True)
+			cv.ShowImage("PCA", cv.Reshape(eigenHand, 0, self.sizeImg))
 			print "press any key.."
 			cv.WaitKey()       
 
-		#4) return the projection-matrix, eigen-values and the mean
-		if(len(sign)>0):
+		#8) store the projection of the data 
+		if(len(sign)>1):
 			cvData = self.array2cv(projX, False)
-			cv.Save("data_train/"+str(sign)+"PcaTrain"+str(self.sizeImg)+".dat", cvData)	
-		return projX, X, meanX
+			cv.Save("data_train/"+str(folder)+str(sign)+"Train"+str(self.sizeImg)+".dat", cvData)
+		return projX
 	#________________________________________________________________________
 	#covert an cvMatrix / cvImage to a numpy.array 	
 	def cv2array(self, im, isImg):
@@ -107,17 +148,8 @@ class eigenHands:
 			arrdtype = 'uint8'
 			channels = 1
 		else:
-			depth2dtype = {
-				cv.IPL_DEPTH_8U: 'uint8',
-				cv.IPL_DEPTH_8S: 'int8',
-				cv.IPL_DEPTH_16U: 'uint16',
-				cv.IPL_DEPTH_16S: 'int16',
-				cv.IPL_DEPTH_32S: 'int32',
-				cv.IPL_DEPTH_32F: 'float32',
-				cv.IPL_DEPTH_64F: 'float64',
-			}
-			arrdtype = depth2dtype[im.depth]
-			channels = im.nChannels
+			arrdtype = 'float32'
+			channels = 1
 		a = numpy.fromstring(im.tostring(),dtype=arrdtype,count=im.width*im.height*channels)
 		a.shape = (im.height,im.width,channels)
 		a = numpy.asfarray(a)
