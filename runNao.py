@@ -37,21 +37,19 @@ except:
 
 goNao.naoBehaviors("demo")
 for i in range(0,3):
+	#3) RESET THE VARIABLES 
 	try:
 		thread.start_new_thread(skin.reinitGame, ())
 	except:
 		print "error for skin init"
 
-	#3) LET'S PLAY NOW___________________
+	#4) LET'S PLAY NOW___________________
 	goNao.naoBehaviors("play")
 	
-	#4) PREDICT WHO PLAYED WHAT_________________	
+	#5) PREDICT WHO PLAYED WHAT_________________	
 	goNao.naoBehaviors("move")
-
 	moves = {0:"rock", 1:"paper", 2:"scissors"}
-
-	print str(skin.maximum)+" "+str(skin.maxnr)
-
+	print str(skin.maximum)+"["+str(skin.maxnr)+"] >>> vs >>> "+str(moves[int(goNao.naoMove)])
 	if(skin.maxnr >= 2 and skin.maximum != "none" and skin.maximum != "garb"):
 		if(skin.maximum == moves[int(goNao.naoMove)]): #0=rock, 1=paper, 2=scissors
 			goNao.naoBehaviors("equal")
@@ -67,13 +65,7 @@ for i in range(0,3):
 			goNao.naoBehaviors("lost")
 		elif(skin.maximum == "scissors" and goNao.naoMove == 1):
 			goNao.naoBehaviors("won")
-		#5) RESET THE VARIABLES 
-		try:
-			thread.start_new_thread(skin.reinitGame, ())
-		except:
-			print "error for skin init"
-
-
+		
 
 
 
