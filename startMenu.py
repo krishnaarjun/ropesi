@@ -26,74 +26,91 @@ print "\t5 => generate data convolved with multiple Gabor wavelets + concatenate
 print "\t6 => do some classifications (SVN)"
 print "\t7 => do some classifications (Knn)"
 print "\t8 => create the FINAL models for classifiers\n"
-choice  = raw_input('your choice... ') 
-sizeImg = raw_input('the size of the training images ...')   
-build   = raw_input('build the training matrixes (y/n) ...')   
-print "\n"
+choice   = raw_input('your choice... ') 
+sizeImg  = raw_input('the size of the training images ...')   
+build    = raw_input('build the training matrixes (y/n) ...')   
 buildOpt = {'y':True, 'n':False}
+print "\n"
+#____________________________________________________________________________________________________
+#____________________________________________________________________________________________________
+#____________________________________________________________________________________________________
+
 if(int(choice) == 1):
-	dataset = raw_input('choose the dataset (r/p/s) ...')   
+	dataset = raw_input('choose the dataset c= > rock & paper & scissors; h => hands vs garbage ...')   
 	noComp  = raw_input('number of components for PCA ...')         
-	datas   = {'r':'rock', 'p':'paper', 's':'scissors'} 
+	datas   = {'c':['rock','paper','scissors'], 'h':['hands','garb']} 
 	hands   = eigenHands(int(sizeImg))
 	if(build == 'y'):
-		hands.makeMatrix(datas[dataset])
-	X = hands.justGetDataMat(datas[dataset])
-	hands.doPCA(X, int(noComp), True, datas[dataset])
+		for i in range(0,len(datas[dataset])):
+			hands.makeMatrix(datas[dataset][i])
+	projData,X,_ = hands.justGetDataMat(datas[dataset][0],"",False)
+	hands.doPCA(X, int(noComp), "PCA/")
+	for i in range(0,len(datas[dataset])):
+		hands.projPCA(projData, True, "PCA/", datas[dataset][i])
+#____________________________________________________________________________________________________
+
 elif(int(choice) == 2):
-	#lambda=[2,256], gamma=[0.2,1], psi=[0,180], theta=[0,180], sigma=[3,68]	
-	"""print "you need to define the parameters of the Gabor Wavelet"
-	lambd   = raw_input('define lambda (2 - 256): ...') 	
-	gamma   = raw_input('define gamma (0.2 - 1): ...') 
-	psi     = raw_input('define psi (0 - 180): ...') 
-	theta   = raw_input('define theta (-90 - 90): ...') 
-	sigma   = raw_input('define gamma (3 - 68): ...')
-	dim     = raw_input('define dimension (2 - 10): ...')"""
 	dataset = raw_input('choose the dataset (r/p/s) ...')
 	datas   = {'r':'rock', 'p':'paper', 's':'scissors'} 
 	gabor   = gaborFilters(buildOpt[str(build)],int(sizeImg))
-	#gabor.setParameters(float(lambd), float(gamma), int(psi), int(theta), float(sigma), int(dim))
 	gabor.setParameters(10, 1.0, 10, -45, 8.0, 2)
-	data    = cv.Load("data_train/"+datas[dataset]+"Train.dat")
+	data    = cv.Load("data_train/"+datas[dataset]+"Train"+str(sizeImg)+".dat")
 	gabor.convolveImg(data, True)
+#____________________________________________________________________________________________________
+
 elif(int(choice) == 3):
 	aNumber = raw_input('write an unused nr/word ...')  
-	prep    = preprocessing(int(sizeImg))
+	prep    = preprocessing(int(sizeImg),0,0)
 	prep.getHandsVideo(aNumber)
+#____________________________________________________________________________________________________
+
 elif(int(choice) == 4):
-	dataset = raw_input('choose the dataset (r/p/s) ...')
-	noComp1 = raw_input('number of components for PCA no 1...')
-	noComp2 = raw_input('number of components for PCA no 2...') 		 		
-	datas   = {'r':'rock', 'p':'paper', 's':'scissors'} 	
-	prep    = preprocessing(int(sizeImg))
-	data    = cv.Load("data_train/"+datas[dataset]+"Train"+str(sizeImg)+".dat")
-	prep.doManyGabors(data, datas[dataset], int(noComp1), int(noComp2), True, False)
+	noComp = raw_input('number of components for PCA no ...')
+	dataset = raw_input('choose the dataset c= > rock & paper & scissors; h => hands vs garbage ...')   
+	datas   = {'c':['rock','paper','scissors'], 'h':['hands','garb']} 
+	hands   = eigenHands(int(sizeImg))
+	_,data,txtLabels = hands.justGetDataMat(datas[dataset][0],"",False)
+	prep    = preprocessing(int(sizeImg),int(noComp))
+	prep.doManyGabors(data,txtLabels,dataset, False)
+#____________________________________________________________________________________________________
+
 elif(int(choice) == 5):
-	dataset = raw_input('choose the dataset (r/p/s) ...')
 	noComp  = raw_input('number of components for PCA ...')
-	datas   = {'r':'rock', 'p':'paper', 's':'scissors'} 	
-	prep    = preprocessing(int(sizeImg))
-	data    = cv.Load("data_train/"+datas[dataset]+"Train"+str(sizeImg)+".dat")
-	prep.doSmallManyGabors(data, datas[dataset], int(noComp), True, False)
+	dataset = raw_input('choose the dataset c= > rock & paper & scissors; h => hands vs garbage ...')   
+	datas   = {'c':['rock','paper','scissors'], 'h':['hands','garb']} 
+	hands   = eigenHands(int(sizeImg))
+	_,data,txtLabels = hands.justGetDataMat(datas[dataset][0],"",False)
+	prep    = preprocessing(int(sizeImg),int(noComp))
+	prep.doSmallManyGabors(data,txtLabels,dataset,True)
+#____________________________________________________________________________________________________
+
 elif(int(choice) == 6):
 	dataset = raw_input('classify h => hands vs garbage; r => rock vs paper & scissors; p => paper vb scissors ...')	
 	typeu   = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
 	datas  = {'r':'rock', 'h':'hands', 'p':'paper'} 
 	classi = classifyHands(buildOpt[str(build)],int(sizeImg))	
 	classi.classifySVM(int(typeu), datas[dataset])
+#____________________________________________________________________________________________________
+
 elif(int(choice) == 7):
 	dataset = raw_input('classify h => hands vs garbage; c => rock & paper & scissors ...')	
 	typeu   = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
 	datas  = {'c':'rock', 'h':'hands'} 
 	classi = classifyHands(buildOpt[str(build)],int(sizeImg))	
-	classi.classifyKNN(int(typeu), datas[dataset], 5)
+	classi.classifyKNN(int(typeu), datas[dataset],3)
+#____________________________________________________________________________________________________
+
 elif(int(choice) == 8):
 	model    = raw_input('model to built: s => svm; k => knn ...')	
 	dataset  = raw_input('classify h => hands vs garbage; c => rock & paper & scissors ...')	
 	datas    = {'c':'rock', 'h':'hands'} 
 	modelOpt = {'s':'svm', 'k':'knn'} 
 	typeu    = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
-	predict  = predictSign(int(sizeImg),buildOpt[str(build)])
+	if(typeu == "3" or typeu == 4):
+		noComp = raw_input('number of components for PCA no ...')
+	else:
+		noComp = 0
+	predict  = predictSign(int(sizeImg),buildOpt[str(build)], int(noComp))
 	predict.storeModel(modelOpt[str(model)], datas[dataset], int(typeu))
 	
 
