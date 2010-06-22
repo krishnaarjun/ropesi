@@ -109,13 +109,14 @@ class preprocessing:
 				for k in range(0, self.noComp):
 					convo[j,(i*self.noComp)+k] = preConv[j,k]
 		
-		#5) do PCA on the concatenated convolved images 
+		#5) do PCA on the concatenated convolved images
+		finalConv = None
 		if(isPCA == True): #not the test image
 			print "does PCA"
 			if(data.shape[0]>1):
 				self.pca.doPCA(convo, self.noComp, "Gabor/")
-		else:
-			finalConv = self.pca.projPCA(convo, False, "Gabor/", "")
+			else:
+				finalConv = self.pca.projPCA(convo, False, "Gabor/", "")
 
 		#6) split the set corresponding to labels and store it
 		if(data.shape[0]>1): #not the test image			
@@ -164,10 +165,12 @@ class preprocessing:
 					convo[j,((i+1)*data.shape[1])+k] = convNumpy[j,k]
 			
 		#5) do PCA on the concatenated (convolved+original) images 
-		if(data.shape[0]>1 and isPCA == True): #not the test image					
-			self.pca.doPCA(convo, self.noComp, "GaborImg/")
-		else:
-			finalConv = self.pca.projPCA(convo, False, "GaborImg/", "")
+		finalConv = None
+		if(isPCA == True): #not the test image
+			if(data.shape[0]>1):					
+				self.pca.doPCA(convo, self.noComp, "GaborImg/")
+			else:
+				finalConv = self.pca.projPCA(convo, False, "GaborImg/", "")
 
 		#6) split the set corresponding to labels and store it
 		if(data.shape[0]>1): #not the test image
