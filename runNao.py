@@ -37,7 +37,10 @@ except:
 
 goNao.naoBehaviors("demo")
 for i in range(0,3):
-	thread.start_new_thread(skin.reinitGame, ())
+	try:
+		thread.start_new_thread(skin.reinitGame, ())
+	except:
+		print "error for skin init"
 
 	#3) LET'S PLAY NOW___________________
 	goNao.naoBehaviors("play")
@@ -65,8 +68,11 @@ for i in range(0,3):
 		elif(skin.maximum == "scissors" and goNao.naoMove == 1):
 			goNao.naoBehaviors("won")
 		#5) RESET THE VARIABLES 
-		thread.start_new_thread(skin.reinitGame, ())
-	
+		try:
+			thread.start_new_thread(skin.reinitGame, ())
+		except:
+			print "error for skin init"
+
 
 
 
