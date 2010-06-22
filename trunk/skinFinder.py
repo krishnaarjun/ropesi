@@ -14,7 +14,7 @@ class detectSkin:
         self.goalImg     = cv.CreateImage((70,70), cv.IPL_DEPTH_8U, 1)
 	self.predict     = predictSign(70, False, 0) # takes the size of the images as input
 	#load the model of the classification
-	self.problem_hand = self.predict.loadModel("knn", 1, "hands") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
+	#self.problem_hand = self.predict.loadModel("knn", 1, "hands") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
 	self.problem_sign = self.predict.loadModel("knn", 1, "rock") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
 
    #__________________________________________________________
@@ -129,9 +129,9 @@ class detectSkin:
 		#cv.SaveImage("train/aa345camera"+str(frameCount)+".jpg", self.goalImg)	
 
 		#does the prediction on the given image of hand
-		whatPred = self.predict.doPrediction(1, "knn", self.problem_hand, "hands", self.goalImg)
-		if(whatPred == "hands"):
-			whatPred = self.predict.doPrediction(1, "knn", self.problem_sign, "rock", self.goalImg)
+		#whatPred = self.predict.doPrediction(1, "knn", self.problem_hand, "hands", self.goalImg)
+		#if(whatPred == "hands"):
+		whatPred = self.predict.doPrediction(1, "knn", self.problem_sign, "rock", self.goalImg)
 		self.predictions[whatPred] += 1 
 		for (key,values) in self.predictions.items():
 			if(values>self.maxnr):
