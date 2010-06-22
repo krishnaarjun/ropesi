@@ -27,7 +27,7 @@ class Gesture:
 		self.counter   = 0
 		self.naoMove   = 0
 		self.possBHVRS = ["demonstrate_rock.xar","demonstrate_paper.xar","demonstrate_scissors.xar","move_rpsBeginGame.xar","move_rock.xar","move_paper.xar",
-"move_scissors.xar","letsPlay.xar","iwon1.xar","iwon2.xar","iwon2.xar","uwon1.xar","uwon2.xar","uwon3.xar","equal1.xar","equal2.xar"]
+"move_scissors.xar","letsPlay.xar","iwon1.xar","iwon2.xar","iwon2.xar","uwon1.xar","uwon2.xar","uwon3.xar","equal1.xar","equal2.xar", "startDemo.xar"]
 		self.connectNao()
 	#____________________________________________________________
 
@@ -60,6 +60,9 @@ class Gesture:
 	def naoBehaviors(self, what):
 		print "NAO BAHVIORS CHOOSING ..."+str(what)
 		if(what is "demo"):
+			doBehavior = self.possBHVRS[16]
+			self.send_command(doBehavior, what)
+			
 			doBehavior = self.possBHVRS[0]
 			self.send_command(doBehavior, what)
 			doBehavior = self.possBHVRS[1]
@@ -73,12 +76,12 @@ class Gesture:
 			self.send_command(doBehavior, what)
 		elif(what is "move"):
 			self.naoMove = random.randint(0,2)	
-			doBehavior   = self.possBHVRS[self.naoMove + 4]
-			self.send_command(doBehavior, what)            
-		elif(what is "won"):
-			doBehavior = self.possBHVRS[random.randint(0,2)+8]
+			doBehavior   = self.possBHVRS[self.naoMove+4]
 			self.send_command(doBehavior, what)            
 		elif(what is "lost"):
+			doBehavior = self.possBHVRS[random.randint(0,2)+8]
+			self.send_command(doBehavior, what)            
+		elif(what is "won"):
 			doBehavior = self.possBHVRS[random.randint(0,2)+11]
 			self.send_command(doBehavior, what)            
 		elif(what is "equal"):
