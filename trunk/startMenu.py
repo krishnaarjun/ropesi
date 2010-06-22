@@ -34,19 +34,23 @@ print "\n"
 #____________________________________________________________________________________________________
 #____________________________________________________________________________________________________
 #____________________________________________________________________________________________________
+if(buildOpt == "y"):
+	datas = ['rock','paper','scissors','hands','garb']
+	for aset in data:	
+		hands = eigenHands(int(sizeImg))	
+		hands.makeMatrix(aset)
+#____________________________________________________________________________________________________
 
 if(int(choice) == 1):
 	dataset = raw_input('choose the dataset c= > rock & paper & scissors; h => hands vs garbage ...')   
 	noComp  = raw_input('number of components for PCA ...')         
 	datas   = {'c':['rock','paper','scissors'], 'h':['hands','garb']} 
 	hands   = eigenHands(int(sizeImg))
-	if(build == 'y'):
-		for i in range(0,len(datas[dataset])):
-			hands.makeMatrix(datas[dataset][i])
-	projData,X,_ = hands.justGetDataMat(datas[dataset][0],"",False)
+	_,X,_ = hands.justGetDataMat(datas[dataset][0],"",False)
 	hands.doPCA(X, int(noComp), "PCA/")
 	for i in range(0,len(datas[dataset])):
-		hands.projPCA(projData, True, "PCA/", datas[dataset][i])
+		projData = hands.justGetDataMat(datas[dataset][i],"",True)
+		hands.projPCA(projData, False, "PCA/", datas[dataset][i])
 #____________________________________________________________________________________________________
 
 elif(int(choice) == 2):
@@ -81,7 +85,7 @@ elif(int(choice) == 5):
 	hands   = eigenHands(int(sizeImg))
 	_,data,txtLabels = hands.justGetDataMat(datas[dataset][0],"",False)
 	prep    = preprocessing(int(sizeImg),int(noComp))
-	prep.doSmallManyGabors(data,txtLabels,dataset,True)
+	prep.doSmallManyGabors(data,txtLabels,dataset,False)
 #____________________________________________________________________________________________________
 
 elif(int(choice) == 6):
@@ -97,7 +101,7 @@ elif(int(choice) == 7):
 	typeu   = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
 	datas  = {'c':'rock', 'h':'hands'} 
 	classi = classifyHands(buildOpt[str(build)],int(sizeImg))	
-	classi.classifyKNN(int(typeu), datas[dataset],3)
+	classi.classifyKNN(int(typeu), datas[dataset],4)
 #____________________________________________________________________________________________________
 
 elif(int(choice) == 8):
