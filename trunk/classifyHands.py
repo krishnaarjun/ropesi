@@ -143,9 +143,12 @@ class classifyHands:
 		train  = train[indexs,:] 
 
 		#3) define the folds, train and test
-		pred_err = 0.0
+		pred_err     = 0.0
+		err_rock     = 0.0
+		err_paper    = 0.0
+		err_scissors = 0.0
 		fold_ind = 0
-		folds    = self.myFolds(labels, [1,2,3], 20)
+		folds    = self.myFolds(labels, [1,2,3], 50)
 		for (trainI,testI) in folds:
 			fold_ind += 1
 			trainSet, testSet = train[trainI], train[testI]
@@ -157,6 +160,17 @@ class classifyHands:
 			totalTime  = 0
 			prediction = problem.predict(testSet)
 			wrong      = numpy.where(numpy.array(prediction) != numpy.array(testLab))[0]
+			if(theSign == "rock"):
+				labWrong       = testLab[map(None,wrong)]
+				wrong_rock     = numpy.where(labWrong == 1)[0]
+				wrong_paper    = numpy.where(labWrong == 2)[0]
+				wrong_scissors = numpy.where(labWrong == 3)[0]
+				rocks          = numpy.where(testLab == 1)[0]
+				papers         = numpy.where(testLab == 2)[0]
+				scissors       = numpy.where(testLab == 3)[0]
+				err_rock      += float(float(wrong_rock.shape[0])/float(len(rocks)))
+				err_paper     += float(float(wrong_paper.shape[0])/float(len(papers)))
+				err_scissors  += float(float(wrong_scissors.shape[0])/float(len(scissors)))
 			pred_err  += float(float(wrong.shape[0])/float(len(testLab)))
 			print prediction
 			print testLab
@@ -164,7 +178,12 @@ class classifyHands:
 	    		totalTime += zaTime/(cv.GetTickFrequency()*1000.0*float(len(testLab)))
 			print "cumulative error %f >>> prediction time/image %gms" % (pred_err, totalTime)                	
 		avg_err = float(pred_err)/float(len(folds))
-		print "\nAverage error over 20 folds:"+str(avg_err)
+		if(theSign == "rock"):		
+			avg_rock     = float(err_rock)/float(len(folds))
+			avg_paper    = float(err_paper)/float(len(folds))
+			avg_scissors = float(err_scissors)/float(len(folds))
+
+		print "\nAvg Error:"+str(avg_err)+" >>> Avg Rock Error:"+str(avg_rock)+" >>> Avg Paper Error:"+str(avg_paper)+" >>> Avg Scissors Error:"+str(avg_scissors)
 		return problem
 	#________________________________________________________________________
 	#implements k bolds for multiple classes 
