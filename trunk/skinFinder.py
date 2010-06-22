@@ -8,15 +8,27 @@ from predictSign import *
 class detectSkin:
     def __init__(self):
 	#most predicted:
-	self.predictions = {"rock":0, "paper":0, "scissors":0, "garb":0}
+	self.predictions = {"rock":0, "paper":0, "scissors":0, "garb":0, "none":0}
 	self.maximum     = ""
-
+	self.maxnr       = 0
+        self.goalImg     = cv.CreateImage((70,70), cv.IPL_DEPTH_8U, 1)
+	self.predict     = predictSign(70, False, 0) # takes the size of the images as input
 	#load the model of the classification
-	self.predict = predictSign(70, False, 0) # takes the size of the images as input
-	problem_hand = self.predict.loadModel("knn", 1, "hands") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
-	problem_sign = self.predict.loadModel("knn", 1, "rock") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
-	self.goalImg = cv.CreateImage((70,70), cv.IPL_DEPTH_8U, 1)
+	self.problem_hand = self.predict.loadModel("knn", 1, "hands") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
+	self.problem_sign = self.predict.loadModel("knn", 1, "rock") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
 
+   #__________________________________________________________
+
+    def reinitGame(self):
+#	print "REINIT IN SKIN DETECT"	
+
+	self.predictions = {"rock":0, "paper":0, "scissors":0, "garb":0, "none":0}
+	self.maximum     = ""
+	self.maxnr       = 0	
+   #__________________________________________________________
+
+    def findSkin(self): 	
+#	print "finding skin"   
 	#skin detector from now on 
         capture = cv.CreateCameraCapture(int(0))
         cascade = cv.Load("haarcascades/haarcascade_frontalface_alt.xml")
@@ -117,21 +129,23 @@ class detectSkin:
 		#cv.SaveImage("train/aa345camera"+str(frameCount)+".jpg", self.goalImg)	
 
 		#does the prediction on the given image of hand
-		whatPred = self.predict.doPrediction(1, "knn", problem_hand, "hands", self.goalImg)
-		if(whatPred == 1):
-			whatPred = self.predict.doPrediction(1, "knn", problem_sign, "rock", self.goalImg)
+		whatPred = self.predict.doPrediction(1, "knn", self.problem_hand, "hands", self.goalImg)
+		if(whatPred == "hands"):
+			whatPred = self.predict.doPrediction(1, "knn", self.problem_sign, "rock", self.goalImg)
 		self.predictions[whatPred] += 1 
-		items = self.predictions.items()
-		self.maximum = max(items[1])
+		for (key,values) in self.predictions.items():
+			if(values>self.maxnr):
+				self.maximum = key
+				self.maxnr   = values
 
 		if frameCount%10==0:
                     print "after %i frames the average time = %gms" % (frameCount, totalTime/frameCount)
 	
                 if cv.WaitKey(10) >= 0:
-                    break
-
-    def findFace(self,img,cascade):
-        
+                    break	
+    #________________________________________________
+	
+    def findFace(self,img,cascade):       
         bestFaceX    = 0
         bestFaceY    = 0
         bestFaceW    = 0
