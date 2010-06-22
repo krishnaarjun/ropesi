@@ -88,7 +88,7 @@ class predictSign:
 				indexs,labels,train = self.classify.getDataLabels(onImg, theSign, False)
 
 			#1) initialize the svm and compute the model
-			problem = mlpy.Knn(3, dist='se')
+			problem = mlpy.Knn(5, dist='se')
 
 			#2) shuffle input data to do the 10-fold split 
 			shuffle(indexs)
@@ -117,7 +117,7 @@ class predictSign:
 		if(model == "svm"):
 			classifyWhat = {"hands":{"1":"hands", "-1":"garb"}, "rock": {"1":"rock", "-1":"paper or scissors"}, "paper":{"1":"paper", "-1":"scissors"}}
 		else:
-			classifyWhat = {"hands":{"1":"hands", "-1":"garb", "0":"..don't know"}, "rock":{"1":"rock", "2":"paper", "3":"scissors", "0":"..don't know"}}
+			classifyWhat = {"hands":{"1":"hands", "-1":"garb", "0":"none"}, "rock":{"1":"rock", "2":"paper", "3":"scissors", "0":"none"}}
 		zaTime     = cv.GetTickCount() 
 		testImg    = self.preprocessImg(image, zaType)
 		prediction = problem.predict(testImg)
@@ -125,7 +125,7 @@ class predictSign:
 	    	totalTime += zaTime/(cv.GetTickFrequency()*1000.0)
 		if((what!="hands") or (prediction[0]==0 and what=="hands")):	
 			print "it is a..."+str(classifyWhat[str(what)][str(prediction[0])])+" >>> prediction time/image %gms" % totalTime
-		return prediction[0]
+		return str(classifyWhat[str(what)][str(prediction[0])])
 	#________________________________________________________________________
 	def preprocessImg(self, image, zaType):
 		#1) resize the image to the needed size
