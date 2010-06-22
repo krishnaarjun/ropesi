@@ -51,24 +51,24 @@ class classifyHands:
 			signs = {"hands":["garb"], "rock":["paper", "scissors"], "paper":["scissors"]}
 
 		if(onImg == 1):
-			good = self.pca.justGetDataMat(theSign)
+			good = self.pca.justGetDataMat(theSign,"",True)
 		elif(onImg == 2):
-			good = self.pca.justGetDataMat(theSign+"Pca")
+			good = self.pca.justGetDataMat(theSign,"PCA/",True)
 		elif(onImg == 3):
-			good = self.pca.justGetDataMat(theSign+"Conv")
+			good = self.pca.justGetDataMat(theSign,"GaborImg/",True)
 		elif(onImg == 4):
-			good = self.pca.justGetDataMat(theSign+"ConvLarge")
+			good = self.pca.justGetDataMat(theSign,"Gabor/",True)
 		bad     = []
 		badSize = 0
 		for aSign in signs[theSign]:
 			if(onImg == 1):
-				preBad = self.pca.justGetDataMat(aSign)
+				preBad = self.pca.justGetDataMat(aSign,"",True)
 			elif(onImg == 2):
-				preBad = self.pca.justGetDataMat(aSign+"Pca")
+				preBad = self.pca.justGetDataMat(aSign,"PCA/",True)
 			elif(onImg == 3):
-				preBad = self.pca.justGetDataMat(aSign+"Conv")
+				preBad = self.pca.justGetDataMat(aSign,"GaborImg/",True)
 			elif(onImg == 4):
-				preBad = self.pca.justGetDataMat(aSign+"ConvLarge")
+				preBad = self.pca.justGetDataMat(aSign,"Gabor/",True)
 			badSize += preBad.shape[0]
 			bad.append(preBad)
 		labels    = numpy.ones(good.shape[0]+badSize, dtype=int)
