@@ -26,7 +26,8 @@ class Gesture:
 		self.position  = "stand"
 		self.counter   = 0
 		self.naoMove   = 0
-		self.possBHVRS = ["demonstrate_rock.xar","demonstrate_paper.xar","demonstrate_scissors.xar","move_rpsBeginGame.xar","move_rock.xar","move_paper.xar","move_scissors.xar","letsPlay.xar"]
+		self.possBHVRS = ["demonstrate_rock.xar","demonstrate_paper.xar","demonstrate_scissors.xar","move_rpsBeginGame.xar","move_rock.xar","move_paper.xar",
+"move_scissors.xar","letsPlay.xar","iwon1.xar","iwon2.xar","iwon2.xar","uwon1.xar","uwon2.xar","uwon3.xar","equal1.xar","equal2.xar"]
 		self.connectNao()
 	#____________________________________________________________
 
@@ -72,13 +73,13 @@ class Gesture:
 			doBehavior   = self.possBHVRS[self.naoMove + 4]
 			self.send_command(doBehavior, what)            
 		elif(what is "won"):
-			doBehavior = self.possBHVRS[]
+			doBehavior = self.possBHVRS[random.randint(0,2)+8]
 			self.send_command(doBehavior, what)            
 		elif(what is "lost"):
-			doBehavior = self.possBHVRS[]
+			doBehavior = self.possBHVRS[random.randint(0,2)+11]
 			self.send_command(doBehavior, what)            
 		elif(what is "equal"):
-			doBehavior = self.possBHVRS[]
+			doBehavior = self.possBHVRS[random.randint(0,1)+14]
 			self.send_command(doBehavior, what)            
 #____________________________________________________________
 
