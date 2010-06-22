@@ -9,14 +9,14 @@ if path == "None":
 	sys.exit(1)
 else:
 	#import naoqi lib
-	alPath = "C:\Program Files\Aldebaran\Choregraphe 1.6.13\lib"
+	alPath = "/data/Documents/semester2/AIProject/nao/lib"
+	#alPath = "C:\Program Files\Aldebaran\Choregraphe 1.6.13\lib"
 	sys.path.append(alPath)
 	import naoqi
 	from naoqi import ALBroker
 	from naoqi import ALModule
 	from naoqi import ALProxy
 	from naoqi import ALBehavior 
-
 BASEPATH = "/home/nao/behaviors/"
 #____________________________________________________________
 
@@ -32,6 +32,7 @@ class Gesture:
 	#____________________________________________________________
 
 	def connectNao(self):
+#		print "CONNECT NAO"
 		host = "192.168.0.80"
 		port = 9559
 		self.frame = ALProxy("ALFrameManager", host, port)
@@ -39,11 +40,12 @@ class Gesture:
 	#____________________________________________________________
 		
 	def send_command(self, doBehavior, what):
+#		print "SEND COMMAND (DOES THE MOVE)"	
 		gesture_path = BASEPATH + doBehavior
 		gesture_id = self.frame.newBehaviorFromFile(gesture_path, "")
 		self.motion.stiffnessInterpolation("Body", 1.0, 1.0)
 		self.frame.playBehavior(gesture_id)
-		if(what == "demo"):
+		if(what != "demo"):
 			self.frame.completeBehavior(gesture_id)
 		self.after_effects("")
 	#____________________________________________________________
@@ -56,6 +58,7 @@ class Gesture:
 	#____________________________________________________________
 
 	def naoBehaviors(self, what):
+		print "NAO BAHVIORS CHOOSING ..."+str(what)
 		if(what is "demo"):
 			doBehavior = self.possBHVRS[0]
 			self.send_command(doBehavior, what)
@@ -80,7 +83,7 @@ class Gesture:
 			self.send_command(doBehavior, what)            
 		elif(what is "equal"):
 			doBehavior = self.possBHVRS[random.randint(0,1)+14]
-			self.send_command(doBehavior, what)            
+			self.send_command(doBehavior, what) 
 #____________________________________________________________
 
 
