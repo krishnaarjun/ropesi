@@ -7,6 +7,10 @@ from predictSign import *
 
 class detectSkin:
     def __init__(self):
+	#most predicted:
+	self.predictions = {"rock":0, "paper":0, "scissors":0, "garb":0}
+	self.maximum     = ""
+
 	#load the model of the classification
 	self.predict = predictSign(70, False, 0) # takes the size of the images as input
 	problem_hand = self.predict.loadModel("knn", 1, "hands") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
@@ -108,16 +112,21 @@ class detectSkin:
 
                 t = cv.GetTickCount() - t
                 totalTime += t/(cv.GetTickFrequency()*1000.)
-                if frameCount%10==0:
-                    print "after %i frames the average time = %gms" % (frameCount, totalTime/frameCount)
-
+                
 		#save image for train
 		#cv.SaveImage("train/aa345camera"+str(frameCount)+".jpg", self.goalImg)	
 
 		#does the prediction on the given image of hand
-		isHand = self.predict.doPrediction(1, "knn", problem_hand, "hands", self.goalImg)
-		if(isHand == 1):
-			self.predict.doPrediction(1, "knn", problem_sign, "rock", self.goalImg)
+		whatPred = self.predict.doPrediction(1, "knn", problem_hand, "hands", self.goalImg)
+		if(whatPred == 1):
+			whatPred = self.predict.doPrediction(1, "knn", problem_sign, "rock", self.goalImg)
+		self.predictions[whatPred] += 1 
+		items = self.predictions.items()
+		self.maximum = max(items[1])
+
+		if frameCount%10==0:
+                    print "after %i frames the average time = %gms" % (frameCount, totalTime/frameCount)
+	
                 if cv.WaitKey(10) >= 0:
                     break
 
@@ -234,7 +243,7 @@ class detectSkin:
         if showImgs:
             cv.ShowImage("skinProbEroded", skinProbImg) #Original skin probability image after thresholding
         #dilate
-        kernelDi = cv.CreateStructuringElementEx(15,15,0,0, cv.CV_SHAPE_ELLIPSE)
+        kernelDi = cv.CreateStructuringElementEx(20,15,0,0, cv.CV_SHAPE_ELLIPSE)
         cv.Dilate(skinProbImg, skinProbImg, kernelDi, 1)
         if showImgs:
             cv.ShowImage("skinProbDilated", skinProbImg) #Original skin probability image after thresholding
@@ -284,7 +293,7 @@ class detectSkin:
             cv.InRangeS(skinProbImgOriginal,10,256,skinProbImgOriginal)
             kernelEr = cv.CreateStructuringElementEx(3,3,0,0, cv.CV_SHAPE_ELLIPSE)
             cv.Erode(skinProbImgOriginal, skinProbImgOriginal, kernelEr, 1)
-            kernelDi = cv.CreateStructuringElementEx(7,11,0,0, cv.CV_SHAPE_ELLIPSE)
+            kernelDi = cv.CreateStructuringElementEx(11,7,0,0, cv.CV_SHAPE_ELLIPSE)
             cv.Dilate(skinProbImgOriginal, skinProbImgOriginal, kernelDi, 1)
 
             for x in range(0,bestCandidateRect[2]):
