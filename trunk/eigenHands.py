@@ -54,7 +54,7 @@ class eigenHands:
 	def justGetDataMat(self, what, folder, justData):
 		data = self.cv2array(cv.Load("data_train/"+str(folder)+str(what)+"Train"+str(self.sizeImg)+".dat"),True)
 		if(justData == True):
-			return data
+			return data[0:100,:] #!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		else:
 			signs = {"rock":["rock","paper","scissors"], "paper":["rock","paper","scissors"], "scissors":["rock","paper","scissors"], "hands":["hands","garb"], "garb":["hands","garb"]}
 			mat   = []
@@ -62,26 +62,28 @@ class eigenHands:
 			cols  = 0 
 			for sign in signs[what]:
 				premat = self.cv2array(cv.Load("data_train/"+str(folder)+str(sign)+"Train"+str(self.sizeImg)+".dat"),True)
-				mat.append(premat)
-				rows += premat.shape[0]
+				mat.append(premat[0:100,:]) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				#!!!!!!!!!!!!!!!!!!! rows += premat.shape[0]
+				rows += 100
 				cols  = premat.shape[1]
-			finalMat  = numpy.zeros((rows, cols), dtype=float)
+			#!!!!!!!!!!!!!!!!!!!!!!!!!! finalMat  = numpy.zeros((rows, cols), dtype=float)
+			finalMat  = numpy.zeros((100*len(mat), cols), dtype=float)
 			txtLabels = {}
 			sizeSoFar = 0
 			for i in range(0,len(mat)):
 				for j in range(0,mat[i].shape[0]):
-					k             = (j+sizeSoFar)
-					if(signs[what][i] in txtLabels):					
-						txtLabels[signs[what][i]].append(k)
-					else:
+					k = (j+sizeSoFar)
+					if(signs[what][i] not in txtLabels):
 						txtLabels[signs[what][i]] = []
+					txtLabels[signs[what][i]].append(k)
 					finalMat[k,:] = mat[i][j,:]
 				sizeSoFar += mat[i].shape[0]
-			return data,finalMat,txtLabels 
+			return data[0:100,:],finalMat,txtLabels #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 	#________________________________________________________________________
 	#perform PCA on set of all images from matName
 	def doPCA(self, X, noComp, folder):
 		#1) extract the mean of the images out of each image
+		X        = numpy.asfarray(X)
 		nr,dim   = X.shape
 		meanX    = numpy.empty((1,dim), dtype=float)	
 		meanX[0] = X.mean(axis=0)
@@ -92,22 +94,22 @@ class eigenHands:
 		#compute: ui[:,i] = (X.T * vi)/norm(ui[:,i])
 		otherS = numpy.dot(X, X.T) #compute: (X * X.T)
 		li,vi  = numpy.linalg.eigh(otherS) #eigenvalues and eigenvectors of (X * X.T)/N
-		indxs  = numpy.argsort(li) 
-		ui     = numpy.dot(X.T, vi) #the formula for the highdim data
+		indxs  = numpy.argsort(li)
+ 		ui     = numpy.dot(X.T, vi[:,indxs[-noComp:]]) #the formula for the highdim data
 
 		#3) normalize the eigenvectors and sort them
-		for i in range(0, nr): #normalize the final eigenvectors
-			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))
-		ui = ui[:,indxs] #sort the eigenvectors of (X * X.T)/N by the eigenvalues (ui and vi have the same eigenvalues => li)
-		
+		for i in range(0, noComp): #normalize the final eigenvectors
+			ui[:,i] = numpy.divide(ui[:,i], numpy.linalg.norm(ui[:,i]))		
+
 		#4) store the eigenvectors and the mean
-		cvEigen = self.array2cv(ui[:,0:noComp], False)
+		cvEigen = self.array2cv(ui, False) 
 		cv.Save("data_train/"+str(folder)+"PcaEigen"+str(self.sizeImg)+".dat", cvEigen)
 		cvMean = self.array2cv(meanX, False)
 		cv.Save("data_train/"+str(folder)+"PcaMean"+str(self.sizeImg)+".dat", cvMean)
 	#________________________________________________________________________
 	#project and verify PCA
 	def projPCA(self, X, showIm, folder, sign):
+		X = numpy.asfarray(X)
 		#1) Load the eigenVector and the Mean of the data:
 		eigen = self.cv2array(cv.Load("data_train/"+str(folder)+"PcaEigen"+str(self.sizeImg)+".dat"), False)
 		meanX = self.cv2array(cv.Load("data_train/"+str(folder)+"PcaMean"+str(self.sizeImg)+".dat"), False)
@@ -117,22 +119,23 @@ class eigenHands:
 			X[i,:] -= meanX[0,:]
 		
 		#3) do projection on first "?" components: [N,4900]x[4900,?] => [N,?] 
-		projX = numpy.dot(X, eigen)
-	
+		projX  = numpy.dot(X, eigen)
+				
 		#5) do back-projection on first "?" components to check: [N,?]x[?,4900] => [N,4900] 
 		if(showIm == True):
 			backX = numpy.dot(projX, eigen.T)
 			for i in range(0, X.shape[0]):
 				backX[i,:] += meanX[0,:] #add the mean back
+
 			#6) normalize the backprojection
 			mini   = numpy.min(backX)
 			backX += abs(mini)
 			maxi   = numpy.max(backX)
-			backX  = numpy.multiply(backX, float(255)/float(maxi))
+			backX  = numpy.multiply(backX, float(255)/float(abs(maxi)))
 			
 			#7) Shot the backprojected image
 			eigenHand = self.array2cv(backX[0:1,:],True)
-			cv.ShowImage("PCA", cv.Reshape(eigenHand, 0, self.sizeImg))
+			cv.ShowImage("PCA_"+str(sign), cv.Reshape(eigenHand, 0, self.sizeImg))
 			print "press any key.."
 			cv.WaitKey()       
 
