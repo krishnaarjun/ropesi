@@ -54,7 +54,7 @@ class eigenHands:
 	def justGetDataMat(self, what, folder, justData):
 		data = self.cv2array(cv.Load("data_train/"+str(folder)+str(what)+"Train"+str(self.sizeImg)+".dat"),True)
 		if(justData == True):
-			return data #[0:500,:] #!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			return data 
 		else:
 			signs = {"rock":["rock","paper","scissors"], "paper":["rock","paper","scissors"], "scissors":["rock","paper","scissors"], "hands":["hands","garb"], "garb":["hands","garb"]}
 			mat   = []
@@ -62,9 +62,8 @@ class eigenHands:
 			cols  = 0 
 			for sign in signs[what]:
 				premat = self.cv2array(cv.Load("data_train/"+str(folder)+str(sign)+"Train"+str(self.sizeImg)+".dat"),True)
-				mat.append(premat) #[0:500,:]) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				mat.append(premat) 
 				rows += premat.shape[0]
-				#rows += 500
 				cols  = premat.shape[1]
 			finalMat  = numpy.zeros((rows, cols), dtype=float)
 			#finalMat  = numpy.zeros((500*len(mat), cols), dtype=float)
@@ -78,7 +77,7 @@ class eigenHands:
 					txtLabels[signs[what][i]].append(k)
 					finalMat[k,:] = mat[i][j,:]
 				sizeSoFar += mat[i].shape[0]
-			return data,finalMat,txtLabels #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+			return data,finalMat,txtLabels  
 	#________________________________________________________________________
 	#perform PCA on set of all images from matName
 	def doPCA(self, X, noComp, folder):
