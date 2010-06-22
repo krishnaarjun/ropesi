@@ -101,7 +101,7 @@ class preprocessing:
 		for i in range(0, len(thetas)):
 			#3) convolve the images with the gabor filters
 			self.gabor.setParameters(lambdas, gammas, psis, thetas[i], sigmas, sizes)
-			convolved = self.gabor.convolveImg(self.pca.array2cv(data,True),True)
+			convolved = self.gabor.convolveImg(self.pca.array2cv(data,True),False)
 
 			#4) concatenate the concolved images with the original stuff on each line
 			preConv = self.pca.cv2array(convolved,True)
@@ -155,7 +155,7 @@ class preprocessing:
 		for i in range(0, len(thetas)):
 			#4) convolve the images with the gabor filters
 			self.gabor.setParameters(lambdas, gammas, psis, thetas[i], sigmas, sizes)
-			convolved = self.gabor.convolveImg(self.pca.array2cv(data,False),True)
+			convolved = self.gabor.convolveImg(self.pca.array2cv(data,False),False)
 
 			#5) concatenate the concolved images with the original image on each line
 			convNumpy = self.pca.cv2array(convolved,True)
