@@ -1,0 +1,89 @@
+% Cupertino Colour Theme
+% Copyright 2010 by Joost Bastings
+% 
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file LICENSE for more details.
+%
+\usetheme{default}
+\usepackage{color}
+\useinnertheme{circles}
+\useoutertheme{default}
+
+% modify the default theme a bit
+\setbeamertemplate{title}[center]%[center]
+%\setbeamertemplate{frametitle}[center]%[center]
+\setbeamertemplate{navigation symbols}{} % no navigation symbols
+\setbeamertemplate{items}[circle]
+\setbeamertemplate{itemize item}{$\blacktriangleright$}
+\setbeamercolor{item}{fg=gray}
+
+
+\setbeamertemplate{frametitle}{
+  \vspace{10pt}
+  \begin{centering}
+  \insertframetitle
+  \par
+  \end{centering}
+}
+
+
+% Define colours
+\DefineNamedColor{named}{CupertinoBlue}{rgb}{0.11,0.11,0.32}
+\DefineNamedColor{named}{CupertinoBlock}{rgb}{0.11,0.11,0.37}
+\DefineNamedColor{named}{CupertinoBlueGray}{rgb}{0.30,0.30,0.32}
+\DefineNamedColor{named}{CupertinoBlockTitle}{rgb}{0.45,0.70,0.1}
+\DefineNamedColor{named}{CupertinoExample}{rgb}{0.24,0.24,0.31}
+\DefineNamedColor{named}{CupertinoAlert}{RGB}{70,150,255}
+
+% gradient background
+\setbeamertemplate{background canvas}[vertical shading][top=black,middle=CupertinoBlue,bottom=CupertinoBlueGray,midpoint=0.4]
+
+% adjust title sizes
+\setbeamerfont{title}{size=\Large}
+\setbeamerfont{frametitle}{size=\Large}
+
+\setbeamercolor{structure}{fg=gray}
+\setbeamercolor*{normal text}{fg=white,bg=darkgray}
+\setbeamercolor{alerted text}{fg=CupertinoAlert,bg=}
+\setbeamercolor{example text}{fg=CupertinoExample,bg=}
+
+\mode<presentation>
+
+
+\setbeamercolor*{structure}{fg=white}
+
+\setbeamercolor{palette primary}{use={structure,normal text},fg=structure.fg,bg=}
+\setbeamercolor{palette secondary}{use={structure,normal text},fg=normal text.fg,bg=}
+\setbeamercolor{palette tertiary}{use={structure,normal text},fg=structure.fg,bg=}
+\setbeamercolor{palette quaternary}{use={structure,normal text},fg=structure.fg,bg=}
+
+
+\setbeamertemplate{blocks}[rounded][shadow=true] 
+\setbeamercolor*{block body}{bg=CupertinoExample}
+\setbeamercolor*{block body alerted}{bg=CupertinoExample}
+\setbeamercolor*{block body example}{bg=CupertinoExample}
+\setbeamercolor*{block title}{parent=structure,fg=CupertinoBlockTitle,bg=CupertinoBlock}
+% \setbeamerfont{block title}{series=\bfseries}
+\setbeamercolor*{block title alerted}{use={normal text,alerted text},fg=alerted text.fg,bg=CupertinoBlue}
+\setbeamercolor*{block title example}{use={normal text,example text},fg=example text.fg,bg=CupertinoBlue}
+\setbeamercolor{item projected}{fg=CupertinoBlue}
+
+\setbeamercolor*{sidebar}{parent=palette primary,bg=}
+
+\setbeamercolor{palette sidebar primary}{use=normal text,fg=normal text.fg}
+\setbeamercolor{palette sidebar secondary}{use=structure,fg=structure.fg}
+\setbeamercolor{palette sidebar tertiary}{use=normal text,fg=normal text.fg}
+\setbeamercolor{palette sidebar quaternary}{use=structure,fg=structure.fg}
+
+\setbeamercolor*{separation line}{}
+\setbeamercolor*{fine separation line}{}
+
+\setbeamercolor*{logo}{bg=}
+\setbeamercolor{headline}{bg=}
+
+\mode
+<all>
