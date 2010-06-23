@@ -203,7 +203,7 @@
 		\vspace*{5px}
 	\end{block}	
 		\item Convolve the each image with the resulted wavelet		
-		\item Reshape images on a single row (for multiple \emph{Gabor wavelets} concatenate them)
+		\item Reshape the convolved images on a single row (for multiple \emph{Gabor wavelets} concatenate them)
 	\end{enumerate}
 }
 
@@ -220,8 +220,8 @@
 	\vspace*{20px}
 	We have used:\\
 	\begin{itemize}
-	\item \emph{1522} training examples for the \emph{"paper"} sign
 	\item \emph{1641} training examples for the \emph{"rock"} sign 
+	\item \emph{1522} training examples for the \emph{"paper"} sign
 	\item \emph{1377} training examples for the \emph{"scissors"} sign
 	\end{itemize}
 }
@@ -268,7 +268,7 @@
 		\vspace*{8px}
 		\item KNN works best. Even on raw images
 		\vspace*{8px}
-		\item When not perfect images are used (slightly different positions and different angles) results
+		\item When not perfect images are used (like the ones extracted by our skin-detector) results
 		tend to drop
 		\vspace*{8px}
 		\item More reliable results were obtained by enriching our training sets with examples of hands extracted by skin-detection with the method described above
