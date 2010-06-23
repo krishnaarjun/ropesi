@@ -75,7 +75,7 @@ elif(int(choice) == 4):
 	hands   = eigenHands(int(sizeImg))
 	_,data,txtLabels = hands.justGetDataMat(datas[dataset][0],"",False)
 	prep    = preprocessing(int(sizeImg),int(noComp))
-	prep.doManyGabors(data,txtLabels,dataset, False)
+	prep.doManyGabors(data,txtLabels,dataset, True)
 #____________________________________________________________________________________________________
 
 elif(int(choice) == 5):
@@ -85,7 +85,7 @@ elif(int(choice) == 5):
 	hands   = eigenHands(int(sizeImg))
 	_,data,txtLabels = hands.justGetDataMat(datas[dataset][0],"",False)
 	prep    = preprocessing(int(sizeImg),int(noComp))
-	prep.doSmallManyGabors(data,txtLabels,dataset,False)
+	prep.doSmallManyGabors(data,txtLabels,dataset,True)
 #____________________________________________________________________________________________________
 
 elif(int(choice) == 6):
