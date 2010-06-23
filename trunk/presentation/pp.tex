@@ -33,7 +33,7 @@
 		\vspace*{5px}
 		\item Classify extracted hands
 		\vspace*{5px}
-		\item Make \emph{Nao} generate the moves for \emph{"rock}, \emph{"paper"} and \emph{"scissors"}
+		\item Make \emph{Nao} generate the moves for \emph{"rock"}, \emph{"paper"} and \emph{"scissors"}
 		\vspace*{5px} 
 		\item Make \emph{Nao} keep the score of the game by recognizing the gestures of the other player
 	\end{itemize}
@@ -168,7 +168,7 @@
 		\item Compute the covariance of the data and the eigenvectors of the covariance matrix. For high-dimensional data compute:
 		\begin{block}{}
 			 \vspace*{5px}
-			 \hspace*{45px}\textbf{V} $\rightarrow$ the eigenvectors of: $eigh(\frac{Data\times Data^T}{size(Data))}$\\
+			 \hspace*{45px}\textbf{V} $\rightarrow$ the eigenvectors of: $eigh(Data\times Data^T)$\\
 			 \vspace*{10px}
 			 \hspace*{45px}\textbf{U} $\rightarrow$ the final eigenvectors:  $\frac{Data^T\times V}{norm(Data^T\times V)}$\\
 			 \vspace*{5px}
@@ -207,27 +207,6 @@
 	\end{enumerate}
 }
 
-%Nao DESCRIPTION SECTION___________________________________________________________________________________
-\subsection{About Nao}
-\frame{
-	\frametitle{About Nao}
-	The third part of the project was to implement movement and communication on \emph{Nao}.\\
-	\vspace*{20px}
-	\begin{itemize}
-		\item \emph{Nao} is sweet (naknak)
-		\vspace*{5px}
-		\item It has 500MhZ processor
-		\vspace*{5px}
-		\item It has 3 fingers that move simultaneously
-		\vspace*{5px}
-		\item Broke his hip 2 times in 6 month
-		\vspace*{5px}
-		\item It costs 17.500 dollar (16.800k if you buy 5)
-		\vspace*{5px}
-		\item Additional 3 year maintenance 4.800 dollars
-	\end{itemize}
-}
-
 %EVALUATION SECTION___________________________________________________________________________________
 \section{Evaluation}
 \subsection{Experimental Set-up}
@@ -264,7 +243,7 @@
 			\hline
 			  20$\times$20 & \emph{Gabor + PCA} & 0.446 & 0.516 & 0.577 & 0.510\\
 			\hline
-			  20$\times$20 & \emph{Gabor \& Image} & 0.008 & 0.005 & 0.022 & 0.012\\
+			  \textbf{20$\times$20} & \textbf{\emph{Gabor \& Image}} & \textbf{0.008} & \textbf{0.005} & \textbf{0.022} & \textbf{0.012}\\
 		 	\hline
 			  20$\times$20 & \emph{(Gabor \& Image)} & 0.331 & 0.483 & 0.549 & 0.447\\
 		               & \emph {+ PCA}  &       &	      &       &       \\ 			
@@ -296,6 +275,26 @@
 	\end{itemize}
 }
 
+%Nao DESCRIPTION SECTION___________________________________________________________________________________
+\section{Demo!}
+\frame{
+	\frametitle{Demo!}
+	The third part of the project was to implement movement and communication on \emph{Nao}.\\
+	\vspace*{20px}
+	\begin{itemize}
+		\item \emph{Nao} is sweet (naknak)
+		\vspace*{5px}
+		\item It has 500MhZ processor
+		\vspace*{5px}
+		\item It has 3 fingers that move simultaneously
+		\vspace*{5px}
+		\item Broke his hip 2 times in 6 month
+		\vspace*{5px}
+		\item It costs 17.500 dollar (16.800k if you buy 5)
+		\vspace*{5px}
+		\item His\slash her favorite word is \emph{"heat!"}
+	\end{itemize}
+}
 \end{document}
 
 
