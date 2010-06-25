@@ -28,19 +28,19 @@
 \begin{document}
     \maketitle
 	%ABSTRACT SECTION__________________________________________
-    \abstract{Throughout this paper we are going to try to explain our work on teaching a humanoid robot (\emph{Nao}) to play \emph{"Rock, paper \& scissors"}. In order to accomplish this task we have used different theoretical methods which are described in the section~\ref{sec:methods}. The next section presents our experimental results. Finally we give an overall view of this paper and indicate the possible further work that could be done on this subject.}  
+    \abstract{Throughout this paper we are going to explain our work on teaching a humanoid robot (\emph{Nao}) to play \emph{"Rock, paper \& scissors"}. In order to accomplish this task we have used different theoretical methods which are described in the section~\ref{sec:methods}. The next section presents our experimental results. Finally we give an overall view of this paper and indicate the possible future work that could be done on this subject.}  
 	%SECTION SECTION_________________________________________
     \section{Introduction}
 	\label{sec:intro}
         \emph{"Rock, Paper \& Scissors"} is an easy and well known game. This is the reason for which it is interesting to learn a robot how to play it against human players. In order to do that the robot needs to be able to recognize the hands of its opponent and classify the gesture as: \emph{"rock"}, \emph{"paper"} or \emph{"scissors"}.\\	
 		\hspace*{10px}In this paper we describe our approach to accomplish this in real time. Our solution is fairly robust to lightning condition and also the gestures of the player need not be restricted to certain angles or positions in the frame.\\ 
         \hspace*{10px}Our problem has been split into three main tasks: extracting the hands from the webcam stream, recognizing the gesture of the extracted hand and implementing motion and speech on \emph{Nao}. Throughout our project we have tried different approaches in order to find the best method to solve the problem.\\
-		 \hspace*{10px}We have experimented with methods such as: \emph{backprojection} of pixels values for hand detection, \emph{Gabor filters} and \emph{PCA} for classifying signs. We will start by describing the methods that we have tried to use and then continue by giving an overview of the results and the conclusions.   
+		 \hspace*{10px}We have experimented with methods such as: \emph{backprojection} of pixel values for hand detection, \emph{Gabor filters} and \emph{PCA} for classifying signs. We will start by describing the methods that we have tried and then continue by giving an overview of the results and the conclusions.   
 	%METHODS SECTION__________________________________ 
     \section{Methods}
 	\label{sec:methods}
-		For hand detection and recognition we have tried two different techniques: a naive approach and the backproject of the pixels corresponding to skin.\\
-		\hspace*{10px}For the gesture recognition we have experimented with different sets of data and we have extracted different features using methods such as: \emph{PCA}, \emph{Gabor filters}. We have also tried using two different types of classifiers: \emph{SVM} (support vector machine) and \emph{Knn} (K nearest neighbors).\\
+		For hand detection and recognition we have employed two different techniques: a naive approach and the backproject of the pixels corresponding to skin.\\
+		\hspace*{10px}For the gesture recognition we have experimented with different sets of data and we have extracted different features using methods such as: \emph{PCA} and \emph{Gabor filters}. We have also tried using two different types of classifiers: \emph{SVM} (support vector machine) and \emph{Knn} (K nearest neighbors).\\
 		\hspace*{10px}We will continue by giving a more detailed description of the methods employed. 
         \subsection{Hands extraction}
 		\label{sec:Meth_exrctHands}
@@ -67,7 +67,7 @@
 
         \subsection{Gesture recognition}
 		For the gesture recognition task we have started by using a training set containing images of hands of \emph{70$\times$70}px with different backgrounds. The problem proved to be too complex for our classifiers so we have decided to switch to a simpler one which would contain only centered hands and a black background.\\ 
-		\hspace*{10px}Out of this dataset we have extracted the features to be using during the classification.
+		\hspace*{10px}Out of this dataset we have extracted the features to be used during the classification.
 		\label{sec:Meth_clssifyHands}
 		\subsubsection{PCA}
 		\todo{Silvia .....}\\
