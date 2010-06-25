@@ -27,7 +27,6 @@
 \title{Rock, Paper \& Scissors with Nao}
 \begin{document}
     \maketitle
-	
 	%ABSTRACT SECTION__________________________________________
     \abstract{Throughout this paper we are going to try to explain our work on teaching a humanoid robot (\emph{Nao}) to play \emph{"Rock, paper \& scissors"}. In order to accomplish this task we have used different theoretical methods which are described in the section~\ref{sec:methods}. The next section presents our experimental results. Finally we give an overall view of this paper and indicate the possible further work that could be done on this subject.}  
 	%SECTION SECTION_________________________________________
@@ -67,15 +66,19 @@
         - Resize the area of interest to 70x70
 
         \subsection{Gesture recognition}
+		For the gesture recognition task we have started by using a training set containing images of hands of \emph{70$\times$70}px with different backgrounds. The problem proved to be too complex for our classifiers so we have decided to switch to a simpler one which would contain only centered hands and a black background.\\ 
+		\hspace*{10px}Out of this dataset we have extracted extracted the features to be using during the classification.
 		\label{sec:Meth_clssifyHands}
 		\subsubsection{PCA}
 		\todo{Silvia .....}\\
 
 		\subsubsection{Gabor filters}
+		\begin{flushleft}
 		\begin{figure}[!hbtp]
 		   \centering
-		   \includegraphics[width=0.4\textwidth]{gabor.jpg}
-	   	\end{figure}
+		   \includegraphics[width=0.45\textwidth]{gabor.jpg}
+	   	\end{figure}	
+		\end{flushleft}
 
 		\todo{Sivlia .....}\\
 
