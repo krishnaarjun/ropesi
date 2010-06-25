@@ -14,21 +14,19 @@
 \usepackage{algorithm}
 \usepackage{amssymb}
 \usepackage[parfill]{parskip}
-%\usepackage{palatino, url, multicol} %multicolumns
 \definecolor{gray}{rgb}{0.7,0.7,0.7} 
 \usepackage{enumerate} %for enumerate
-\fontfamily{cmbr}\selectfont\normalsize
 \newcommand{\ds}{\displaystyle}
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{#1}}}
 \newcommand{\fade}[1]{\textcolor{gray}{\textbf{#1}}}
-%\hyphenpenalty=100000
-\date{} % fara data
+\date{} % no date
 \author{\fade{Nimrod Raiman [0336696]}\\\fade{Silvia L. Pintea [6109960]}}
 \title{Rock, Paper \& Scissors with Nao}
 \begin{document}
+	%\fontfamily{ptm}\selectfont\normalsize	
     \maketitle
 	%ABSTRACT SECTION__________________________________________
-    \abstract{Throughout this paper we are going to explain our work on teaching a humanoid robot (\emph{Nao}) to play \emph{"Rock, paper \& scissors"}. In order to accomplish this task we have used different theoretical methods which are described in the section~\ref{sec:methods}. The next section presents our experimental results. Finally we give an overall view of this paper and indicate the possible future work that could be done on this subject.}  
+    \abstract{Throughout this paper we are going to explain our work on teaching a humanoid robot (\emph{Nao}) to play \emph{"Rock, paper \& scissors"}. In order to accomplish this task we have used different theoretical methods which are described in the section~\ref{sec:methods}. The next section presents our experimental results. Finally, we give an overall view of this paper and indicate the possible future work that could be done on this subject.}  
 	%SECTION SECTION_________________________________________
     \section{Introduction}
 	\label{sec:intro}
@@ -45,26 +43,21 @@
         \subsection{Hands extraction}
 		\label{sec:Meth_exrctHands}
         \subsubsection{Naive approach}
-		\todo{Nimrod .....}\\
-
-        \subsubsection{Backprojection of skin pixels}
-        \todo{Nimrod .....}\\
-        Determine hue and saturation values for skin color\\
-        Threshold the image with hue and saturation values\\
-        Use erosion \& dilation\\
-        Find ares corresponding to hands\\
-        vspace*{10px}
-        Robust/sophisticated approach\\
-        Determine skin color histogram\\
-        - Detect face\\
-        - Build histogram of pixels corresponding to the face\\
-        Backproject skin color histogram on whole frame\\
-        Use erosion \& dilation to reduce the noise and fill up gaps\\
-        Extract area of corresponding to the hand\\
-        Use more sophisticated erosion \& dilation on hand area\\
-        - Retain the hand and remove the background\\
-        - Resize the area of interest to 70x70
-
+		 Our first approach for extracting the area from the webcam stream that corresponds to the hand was to define thresholds for the hue and the saturation values for the incoming webcam stream. The resulting binary image would contain all pixels corresponding to skin. Then using erosion and dilation noise was reduced. From the resulting binary image we then could easily find the area corresponding to the hand.\\
+       	\hspace*{10px}This naive approach was not reliable enough because it is very sensitive to objects with a color that is close to skin color in the view of that camera. This approach is also very sensitive to lightning changes (artificial light is more blue than sunlight). Finally, the thresholds need to be defined very broad to make this work for the majority of skin colors.        
+		\subsubsection{Backprojection of skin pixels}
+       	After realizing that our first approach was too naive and instable we needed to find a more robust skin finder.\\
+       \hspace*{10px} Inspired by \cite{IMS} and \emph{Gijs Molenaar} we implemented a skin \emph{PDF} (probability distribution function) approach. In order to make such a \emph{PDF} we needed to build a histogram (normalizing the histogram would give a \emph{PDF}) of an area that we knew for sure it was representative for the skin color of the person standing in front of the camera. For this we chose to use the face area. Using a frontal face \emph{Haar detector} we were able to find the face of the person standing in front of the camera and we constructed a histogram from the inside area of the rectangle returned by the face detector. We removed the borders in order to loose as much background and hair as possible and get an even more reliable skin \emph{PDF} and we constructed a histogram of this area.\\
+       \hspace*{10px} Once we had the histogram, we could backproject it on the image. The resulting image was a gray-scale image showing what areas are more or less probable to correspond to skin (see Figure \ref{img:skinProb}). We first set the probability of the pixels in the face area to zero, because we did not want this to be interfering with finding the hand in the frame. Then we thresholded this image to get rid of areas with very low probability for the skin. Using rough erosion and dilation we got rid of noise and connected the areas that belonged together. This was done roughly because at this step, we just wanted to find the area of the hand and process it separately in a more sophisticated manner. From the resulting image we have selected the biggest blob of pixels that were connected and chose this as the most probable area to correspond to the hand.\\
+		\begin{figure}[!hbtp]
+		   \centering
+		   \includegraphics[width=0.5\textwidth]{hands.png}
+			\caption{Hand detection -- Example}
+			\label{img:skinProb}
+	   	\end{figure}	
+       \hspace*{10px}Once we had the area that corresponded to the hand, we went back to the backprojection image. Here we selected the hand area again to do a more sophisticated thresholding, erosion and dilation on it. After dilation a part of the hand area would end up being white -- corresponding probably to the skin, and another part being black -- probably not skin. The black area was left unchanged while the white area was replaced by the original gray-scale image. The final step was to resize the hand image to \emph{$70\times 70$} pixels to match the training images.\\
+		\hspace*{10px}The resulting image was one in which the hand area was selected and most of the background was removed (see Figure \ref{img:skinProb}).
+		%GESTURE RECOGNITION______________________________________________
         \subsection{Gesture recognition}
 		For the gesture recognition task we have started by using a training set containing images of hands of \emph{70$\times$70}px with different backgrounds. The problem proved to be too complex for our classifiers so we have decided to switch to a simpler one which would contain only centered hands and a black background.\\ 
 		\hspace*{10px}Out of this dataset we have extracted the features to be used during the classification.
@@ -84,8 +77,11 @@
 		\begin{table}[!htbp]
 		\begin{tabular}{| c |}
 			\hline\\
-	 		\emph{$ g(x,y,\lambda,\theta,\psi,\sigma,\gamma) = exp(-\frac{x\prime^2+\gamma^2y\prime^2}{2\sigma^2})cos(2\Pi\frac{x\prime}{\lambda}+\psi)$}\\[10px]
+			\fontfamily{cmbr}\selectfont\scriptsize
+	 		\textbf{$g(x, y, \lambda, \theta, \psi, \sigma, \gamma) = exp(-\frac{x\prime^2+\gamma^2y\prime^2}{2\sigma^2}) cos(2\Pi\frac{x\prime}{\lambda}+\psi)$}\\[10px]
+			\fontfamily{cmbr}\selectfont\small
 			where $x\prime$ = x cos$\theta$+y sin$\theta$\\
+			\fontfamily{ptm}\selectfont\small
 			and $y\prime$ = -x sin$\theta$+y cos$\theta$\\[2px]
 			\hline
 		\end{tabular}
@@ -94,27 +90,35 @@
 		The parameter $\lambda$ represents the frequency of the stripes in the wavelet, $\theta$ gives the angle of the stripes, $\psi$ is a translation parameter, $\sigma$ gives the size of the stripes while $\gamma$ indicates how elliptical they are.\\  
 		\begin{figure}[!hbtp]
 		   \centering
-		   \includegraphics[width=0.45\textwidth]{gabor.png}
+		   \includegraphics[width=0.5\textwidth]{gabor.png}
+			\caption{Gabor wavelet Example}
 	   	\end{figure}	
 		\hspace*{10px}Each image in the training set is convolved with the \emph{Gabor wavelets} and then reshaped as a single row.\\
 		\hspace*{10px}In our project we have used 4 \emph{Gabor wavelets} (with the angle $\theta \in \{0, \frac{\Pi}{4}, \frac{\Pi}{2}, \frac{3\Pi}{4}\}$). Each image was convolved with each one of these 4 wavelets and then reshaped as a row. All 4 results obtained in this manner were then concatenated and stored in single row for each image.\\
-		\hspace*{10px}Besides using this these 4 \emph{Gabor wavelets} we have also tried concatenating to the result the original image also reshaped on a single row.
+		\hspace*{10px}Besides using this these 4 \emph{Gabor wavelets} we have also tried concatenating to the result the original image also reshaped on a single row.\\
+		\hspace*{10px}Unlike the \emph{PCA}, this method gave satisfactory results, fact which indicates that it is capable of determining a set of representative features of the training set.
 		\subsubsection{Classification}
 		In order to be able to classify the gesture we have tried using both the \textbf{SVM} (support vector machine) and \textbf{Knn} (K nearest neighbor) classifiers.\\
 		\hspace*{10px}Given the fact that the data is not perfectly aligned (hands have slightly different positions in the image and different angles) the problem seemed to be too hard for the \textbf{SVM}. It was not able to find a good boundary between the classes.\\
 		\hspace*{10px}To ensure that our approach was correctly implemented we have created a more aligned training set (the hands had only small differences in the angles of their orientation $ \in [-20, +20]$ degrees). For this task the \textbf{SVM} classifier was able to perfectly classify the data (it found a good boundary between the classes) and it gave an error of \emph{0.0}.\\
 		\hspace*{10px}Because we did not want to restrict the player to only a small amount of positions and ways in which a sign could be made we have decided not to use \textbf{SVM}.\\
 		\hspace*{10px}We have experimented also with the \textbf{Knn} classifier. This one was able to give accurate prediction even on the raw training images and thus we have decided to employ it for solving our task of gesture recognition.
+		%NAO MOTION AND SPEECH________________________________________________________________
         \subsection{Motion \& Speech on Nao}
 		\label{sec:Meth_naoPlay}
-        How does Nao play Rock!Paper!Scissors!\\\\
-        Make Nao generate the moves for "rock", "paper" and "scissors"\\
-        I Make Nao keep the score of the game by recognizing the gestures of the
-        other player
+		\emph{Nao} is a humanoid robot with a processor of 500MhZ and 3 fingers that move simultaneously.\\
+		\hspace*{10px}Because the fingers can only be moved simultaneously we had to represent \emph{"paper"} as hand open, \emph{"rock"} as hand closed and \emph{"scissors"} by closing and opening the hand a few times.\\
+		\hspace*{10px}In order to make \emph{Nao} move and talk we had to generate behavior files using the \emph{"Choregraphe"} component and then to remotely connect to \emph{Nao} using its \emph{IP} address and load one of the predefined behaviors that was needed at that specific moment in the game.\\  
+        \hspace*{10px}The hand-detection and gesture recognition parts need to be run in parallel with \emph{Nao}\rq s motion and speech behaviors such that it would be able vocalize the outcome of the game by comparing it\rq s choice of move with the player\rq s one.
+		\begin{figure}[!hbtp]
+		 	\centering
+			\includegraphics[width=0.4\textwidth]{Nao.png}
+		 	\caption{Nao Aldebaran}
+	   	\end{figure}			
 	%EXPERIMENTAL RESULTS SECTION_______________________________________ 
     \section{Results}
 	\label{sec:results}
-		We have used:
+		We have trained our models using images of hands with different positions and orientations. We have used:
 		\begin{itemize}
 		\item \emph{1641} training examples for the \emph{"rock"} sign 
 		\item \emph{1522} training examples for the \emph{"paper"} sign
@@ -144,19 +148,25 @@
 			\hline
 		\end{tabular}
 		\caption{Average errors for different methods}
+		\label{tab:res}
 		\end{table}
-
+		\hspace*{10px}In Table~\ref{tab:res} are depicted the average errors we have obtained while testing our methods. We can notice from here that the \emph{PCA} tends to perform worst than the other methods. It can also be observed that the \emph{Gabor wavelets} have a high prediction accuracy and that the best results are obtained when concatenating the convolved images of \emph{Gabor wavelets} with the original image for the size of \emph{$20\times20$}px.  
 	%CONCLUSIONS & FARTHER WORK SECTION________________________________
     \section{Conclusions}
 	\label{sec:conclusion}
-    	Conclusion\\
-   	 	What now?
+		Throughout this paper we have presented the methods we have employed in order to make a humanoid robot (\emph{Nao}) play \emph{"Rock, paper \& scissors"} against a human opponent.\\
+ 		\hspace*{10px}Our experiments indicate the fact that the \textbf{SVM} classifiers is not very well suited for solving this problem and that it is capable of finding a good boundary between the classes only in the case in which the orientation and the position of the hands does not vary too much. But on the other hand a more simple classifier like the \textbf{Knn} is capable of solving the problem and returning satisfactory results.\\
+		\hspace*{10px}We have also seen that \textbf{PCA} was not able to give features strong enough to allow for a good classification performance. This might be due to the fact that \textbf{PCA} is not background invariant, rotation invariant or translation invariant.\\
+		\hspace*{10px}Given the fact the the hand detection component of our project was not selecting hand as perfectly separated from the background as the ones used for training we had to enhance our training set with a few example given by the hand-detection component in order to ensure stability to our system and a more precise and robust prediction.\\
+		\hspace*{10px}Finally, we believe that other methods might give results as good as the ones presented here. Probably a good idea would be to try employing \emph{SIFT} features in solving this problem.
     %BIBLIOGRAPHY SECTION______________________________________________
 	\begin{thebibliography}{2}
 		\bibitem{gwenns}
 		Yen-Ting Chen, Kuo-Tsung Tsen, \emph{Developing a Multiple-angle Hand Gesture Recognition System for Human Machine Interaction}; 2007
 		\bibitem{gabor}
 		M. R. Tuner, \emph{Texture Discrimination by Gabor Functions}; 1986, Biol. Cybern. 55, p. 71-82 
+		\bibitem{IMS}
+		Comaniciu, Dorin and Ramesh, Visvanathan and Meer, Peter, \emph{Kernel-Based Object Tracking}; 2003, IEEE Trans. Pattern Anal. Mach. Intell., vol 25, p. 564--575
 	\end{thebibliography}    
 \end{document}
 
