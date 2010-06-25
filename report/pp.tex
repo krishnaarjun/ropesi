@@ -78,9 +78,9 @@
 		\item Projecting each training set (corresponding to each sign: \emph{"rock"}, \emph{"paper"} or \emph{"scissors"}) on the space defined by the eigenvectors
 		\end{itemize}
 		\hspace*{10px}For high-dimensional data a better approach than computing the eigenvectors of the matrix: \emph{$Data^T \times Data$} (which for a dataset of \emph{[N,D]} with \emph{$D\gg N$} has the dimension \emph{[D,D]}) would be to use an intermediate step and compute the eigenvectors \emph{$V \rightarrow eigh(Data\times Data^T)$} and then determine the final \emph{eigen-space}: \emph{$U \rightarrow \frac{Data^T\times V}{norm(Data^T\times V)}$}.\\
-		\hspace*{10px}Unfortunately, given the fact that \emph{PCA} is not background invariant, translation invariant or orientation invariant the results were not as good as we were expecting.	
+		\hspace*{10px}Unfortunately, given the fact that \emph{PCA} is not background invariant, translation invariant or rotation invariant the results were not as good as we were expecting.	
 		\subsubsection{Gabor filters}
-		A \emph{Gabor wavelet} is creating by defining the size of the wavelet to be created and then by looping over the coordinates of each pixel (\emph{x} and \emph{y}) and applying the following formula:\\
+		A \emph{Gabor wavelet} is created by defining the size of the wavelet to be generated and then by looping over the coordinates of each pixel (\emph{x} and \emph{y}) and applying the following formula:\\
 		\begin{table}[!htbp]
 		\begin{tabular}{| c |}
 			\hline\\
@@ -100,9 +100,11 @@
 		\hspace*{10px}In our project we have used 4 \emph{Gabor wavelets} (with the angle $\theta \in \{0, \frac{\Pi}{4}, \frac{\Pi}{2}, \frac{3\Pi}{4}\}$). Each image was convolved with each one of these 4 wavelets and then reshaped as a row. All 4 results obtained in this manner were then concatenated and stored in single row for each image.\\
 		\hspace*{10px}Besides using this these 4 \emph{Gabor wavelets} we have also tried concatenating to the result the original image also reshaped on a single row.
 		\subsubsection{Classification}
-		\todo{Silvia .....}\\
-		
-
+		In order to be able to classify the gesture we have tried using both the \textbf{SVM} (support vector machine) and \textbf{Knn} (K nearest neighbor) classifiers.\\
+		\hspace*{10px}Given the fact that the data is not perfectly aligned (hands have slightly different positions in the image and different angles) the problem seemed to be too hard for the \textbf{SVM}. It was not able to find a good boundary between the classes.\\
+		\hspace*{10px}To ensure that our approach was correctly implemented we have created a more aligned training set (the hands had only small differences in the angles of their orientation $ \in [-20, +20]$ degrees). For this task the \textbf{SVM} classifier was able to perfectly classify the data (it found a good boundary between the classes) and it gave an error of \emph{0.0}.\\
+		\hspace*{10px}Because we did not want to restrict the player to only a small amount of positions and ways in which a sign could be made we have decided not to use \textbf{SVM}.\\
+		\hspace*{10px}We have experimented also with the \textbf{Knn} classifier. This one was able to give accurate prediction even on the raw training images and thus we have decided to employ it for solving our task of gesture recognition.
         \subsection{Motion \& Speech on Nao}
 		\label{sec:Meth_naoPlay}
         How does Nao play Rock!Paper!Scissors!\\\\
@@ -112,7 +114,12 @@
 	%EXPERIMENTAL RESULTS SECTION_______________________________________ 
     \section{Results}
 	\label{sec:results}
-    	Some nice results here...\\
+		We have used:
+		\begin{itemize}
+		\item \emph{1641} training examples for the \emph{"rock"} sign 
+		\item \emph{1522} training examples for the \emph{"paper"} sign
+		\item \emph{1377} training examples for the \emph{"scissors"} sign
+		\end{itemize}
 		\begin{table}[!hbtp]
 		\begin{tabular}{| c | c | c |}
 			\hline\hline
