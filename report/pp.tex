@@ -159,8 +159,9 @@
 		Throughout this paper we have presented the methods we have employed in order to make a humanoid robot (\emph{Nao}) play \emph{"Rock, paper \& scissors"} against a human opponent.\\
  		\hspace*{10px}Our experiments indicate the fact that the \textbf{SVM} classifiers is not very well suited for solving this problem and that it is capable of finding a good boundary between the classes only in the case in which the orientation and the position of the hands does not vary too much. But on the other hand a more simple classifier like the \textbf{Knn} is capable of solving the problem and returning satisfactory results.\\
 		\hspace*{10px}We have also seen that \textbf{PCA} was not able to give features strong enough to allow for a good classification performance. This might be due to the fact that \textbf{PCA} is not background invariant, rotation invariant or translation invariant.\\
-		\hspace*{10px}Given the fact the the hand detection component of our project was not selecting hand as perfectly separated from the background as the ones used for training we had to enhance our training set with a few example given by the hand-detection component in order to ensure stability to our system and a more precise and robust prediction.\\
-		\hspace*{10px}Finally, we believe that other methods might give results as good as the ones presented here. Probably a good idea would be to try employing \emph{SIFT} features in solving this problem.
+		\hspace*{10px}Given the fact the the hand detection component of our project was not selecting hand as perfectly separated from the background as the ones used for training we had to enhance our training set with a \todo{few -> lot} example given by the hand-detection component in order to ensure stability to our system and a more precise and robust prediction.\\
+		\hspace*{10px}Finally, we believe that other methods might give results as good as the ones presented here. Probably a good idea would be to try employing \emph{SIFT} features in solving this problem.\\
+        \todo{Right now our software runs at 4 frames per second, with optimization this can be improved to make Nao react even more naturally}
     %BIBLIOGRAPHY SECTION______________________________________________
 	\begin{thebibliography}{2}
 		\bibitem{gwenns}
