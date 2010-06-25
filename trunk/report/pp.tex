@@ -2,13 +2,13 @@
 \usepackage{caption}
 \usepackage{graphicx}
 \usepackage{color} %colors in text
-\usepackage{textcomp} % mai multe:-??
-\usepackage[T1]{pbsi} %hand writting nice :P
-\usepackage[T1]{fontenc} %mai multe fonturi
+\usepackage{textcomp} % 
+\usepackage[T1]{pbsi} %hand writting nice 
+\usepackage[T1]{fontenc} %more fonts
 \usepackage{mathrsfs} % letters for math
-\usepackage{fullpage} % fara margini
-\usepackage{amsmath} % formule matematice
-\usepackage[all]{xy} % pt desenat
+\usepackage{fullpage} % no margins
+\usepackage{amsmath} % math formulas
+\usepackage[all]{xy} % for drawing
 \usepackage{listings}
 \usepackage{algorithmic}
 \usepackage{algorithm}
@@ -17,7 +17,7 @@
 %\usepackage{palatino, url, multicol} %multicolumns
 \definecolor{gray}{rgb}{0.7,0.7,0.7} 
 \usepackage{enumerate} %for enumerate
-\fontfamily{ccbr}\selectfont\normalsize
+\fontfamily{cmbr}\selectfont\normalsize
 \newcommand{\ds}{\displaystyle}
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{#1}}}
 \newcommand{\fade}[1]{\textcolor{gray}{\textbf{#1}}}
@@ -80,19 +80,27 @@
 		\hspace*{10px}For high-dimensional data a better approach than computing the eigenvectors of the matrix: \emph{$Data^T \times Data$} (which for a dataset of \emph{[N,D]} with \emph{$D\gg N$} has the dimension \emph{[D,D]}) would be to use an intermediate step and compute the eigenvectors \emph{$V \rightarrow eigh(Data\times Data^T)$} and then determine the final \emph{eigen-space}: \emph{$U \rightarrow \frac{Data^T\times V}{norm(Data^T\times V)}$}.\\
 		\hspace*{10px}Unfortunately, given the fact that \emph{PCA} is not background invariant, translation invariant or orientation invariant the results were not as good as we were expecting.	
 		\subsubsection{Gabor filters}
-		\begin{center} 
-			\boxed{xxxx}
-		\end{center}
+		A \emph{Gabor wavelet} is creating by defining the size of the wavelet to be created and then by looping over the coordinates of each pixel (\emph{x} and \emph{y}) and applying the following formula:\\
+		\begin{table}[!htbp]
+		\begin{tabular}{| c |}
+			\hline\\
+	 		\emph{$ g(x,y,\lambda,\theta,\psi,\sigma,\gamma) = exp(-\frac{x\prime^2+\gamma^2y\prime^2}{2\sigma^2})cos(2\Pi\frac{x\prime}{\lambda}+\psi)$}\\[10px]
+			where $x\prime$ = x cos$\theta$+y sin$\theta$\\
+			and $y\prime$ = -x sin$\theta$+y cos$\theta$\\[2px]
+			\hline
+		\end{tabular}
+		\end{table}
 
+		The parameter $\lambda$ represents the frequency of the stripes in the wavelet, $\theta$ gives the angle of the stripes, $\psi$ is a translation parameter, $\sigma$ gives the size of the stripes while $\gamma$ indicates how elliptical they are.\\  
 		\begin{flushleft}
 		\begin{figure}[!hbtp]
 		   \centering
 		   \includegraphics[width=0.45\textwidth]{gabor.png}
 	   	\end{figure}	
 		\end{flushleft}
-
-		\todo{Sivlia .....}\\
-
+		\hspace*{10px}Each image in the training set is convolved with the \emph{Gabor wavelets} and then reshaped as a single row.\\
+		\hspace*{10px}In our project we have used 4 \emph{Gabor wavelets} (with the angle $\theta \in \{0, \frac{\Pi}{4}, \frac{\Pi}{2}, \frac{3\Pi}{4}\}$). Each image was convolved with each one of these 4 wavelets and then reshaped as a row. All 4 results obtained in this manner were then concatenated and stored in single row for each image.\\
+		\hspace*{10px}Besides using this these 4 \emph{Gabor wavelets} we have also tried concatenating to the result the original image also reshaped on a single row.
 		\subsubsection{Classification}
 		\todo{Silvia .....}\\
 
