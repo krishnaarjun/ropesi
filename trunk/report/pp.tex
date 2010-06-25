@@ -26,44 +26,44 @@
 	%\fontfamily{ptm}\selectfont\normalsize	
     \maketitle
 	%ABSTRACT SECTION__________________________________________
-    \abstract{Throughout this paper we are going to explain our work on teaching a humanoid robot (\emph{Nao}) to play \emph{"Rock, paper \& scissors"}. In order to accomplish this task we have used different theoretical methods which are described in the section~\ref{sec:methods}. The next section presents our experimental results. Finally, we give an overall view of this paper and indicate the possible future work that could be done on this subject.}  
+    \abstract{Throughout this paper we are going to explain our work on teaching a humanoid robot (\emph{Nao}) to play \emph{"Rock, paper \& scissors"}. In order to accomplish this task we have used different theoretical methods which are described in the section~\ref{sec:methods}. The next section \todo{sounds like reference to introduction} presents our experimental results. Finally, we give an overall view of this paper and indicate the possible future work that could be done on this subject.}  
 	%SECTION SECTION_________________________________________
     \section{Introduction}
 	\label{sec:intro}
-        \emph{"Rock, Paper \& Scissors"} is an easy and well known game. This is the reason for which it is interesting to learn a robot how to play it against human players. In order to do that the robot needs to be able to recognize the hands of its opponent and classify the gesture as: \emph{"rock"}, \emph{"paper"} or \emph{"scissors"}.\\	
-		\hspace*{10px}In this paper we describe our approach to accomplish this in real time. Our solution is fairly robust to lightning condition and also the gestures of the player need not be restricted to certain angles or positions in the frame.\\ 
+        \emph{"Rock, Paper \& Scissors"} is an easy and well known game \todo{for humans}. This is the reason for which it is interesting to learn a robot how to play it against human players. In order to do that the robot needs to be able to recognize the hands of its opponent and classify the gesture as: \emph{"rock"}, \emph{"paper"} or \emph{"scissors"}.\\	
+		\hspace*{10px}In this paper we describe our approach to accomplish this in real time. Our solution is fairly robust to lightning condition and also the gestures of the player need not be restricted to certain angles or positions in the frame \todo{as long as the gesture is clear (not Gwenns way of playing)}.\\ 
         \hspace*{10px}Our problem has been split into three main tasks: extracting the hands from the webcam stream, recognizing the gesture of the extracted hand and implementing motion and speech on \emph{Nao}. Throughout our project we have tried different approaches in order to find the best method to solve the problem.\\
-		 \hspace*{10px}We have experimented with methods such as: \emph{backprojection} of pixel values for hand detection, \emph{Gabor filters} and \emph{PCA} for classifying signs. We will start by describing the methods that we have tried and then continue by giving an overview of the results and the conclusions.   
+		 \hspace*{10px}We have experimented with methods such as: \emph{backprojection} of  \todo{pixel values -> probability histograms} for hand detection, \emph{Gabor filters} and \emph{PCA} for \todo{classifying signs -> feature extraction}. We will start by describing the methods that we have tried and then continue by giving an overview of the results and the conclusions.   
 	%METHODS SECTION__________________________________ 
     \section{Methods}
 	\label{sec:methods}
-		For hand detection and recognition we have employed two different techniques: a naive approach and the backproject of the pixels corresponding to skin.\\
+		For hand detection and recognition we have employed two different techniques: a naive approach and the backproject of \todo{the probability histogram of} the pixels corresponding to skin.\\
 		\hspace*{10px}For the gesture recognition we have experimented with different sets of data and we have extracted different features using methods such as: \emph{PCA} and \emph{Gabor filters}. We have also tried using two different types of classifiers: \emph{SVM} (support vector machine) and \emph{Knn} (K nearest neighbors).\\
 		\hspace*{10px}We will continue by giving a more detailed description of the methods employed. 
         \subsection{Hands extraction}
 		\label{sec:Meth_exrctHands}
         \subsubsection{Naive approach}
-		 Our first approach for extracting the area from the webcam stream that corresponds to the hand was to define thresholds for the hue and the saturation values for the incoming webcam stream. The resulting binary image would contain all pixels corresponding to skin. Then using erosion and dilation noise was reduced. From the resulting binary image we then could easily find the area corresponding to the hand.\\
-       	\hspace*{10px}This naive approach was not reliable enough because it is very sensitive to objects with a color that is close to skin color in the view of that camera. This approach is also very sensitive to lightning changes (artificial light is more blue than sunlight). Finally, the thresholds need to be defined very broad to make this work for the majority of skin colors.        
+		 Our first approach for extracting the area from the webcam stream that corresponds to the hand was to define thresholds for the hue and the saturation values \todo{for the incoming webcam stream (not a very nice sentence I think, maybe on the incomming webcam stream, maybe leave that part out?)}. The resulting binary image would contain all pixels corresponding to skin. Then using erosion and dilation noise was reduced. From the resulting binary image we then could easily find the area corresponding to the hand.\\
+       	\hspace*{10px}This naive approach was not reliable enough because it is very sensitive to objects with a color that is close to skin color in the view of that camera. This approach is also very sensitive to lightning changes (artificial light is more blue than sunlight). Finally, the thresholds need to be defined very broad to make this work for the majority of skin colors \todo{which introducec even more false skin response}.        
 		\subsubsection{Backprojection of skin pixels}
        	After realizing that our first approach was too naive and instable we needed to find a more robust skin finder.\\
-       \hspace*{10px} Inspired by \cite{IMS} and \emph{Gijs Molenaar} we implemented a skin \emph{PDF} (probability distribution function) approach. In order to make such a \emph{PDF} we needed to build a histogram (normalizing the histogram would give a \emph{PDF}) of an area that we knew for sure it was representative for the skin color of the person standing in front of the camera. For this we chose to use the face area. Using a frontal face \emph{Haar detector} we were able to find the face of the person standing in front of the camera and we constructed a histogram from the inside area of the rectangle returned by the face detector. We removed the borders in order to loose as much background and hair as possible and get an even more reliable skin \emph{PDF} and we constructed a histogram of this area.\\
-       \hspace*{10px} Once we had the histogram, we could backproject it on the image. The resulting image was a gray-scale image showing what areas are more or less probable to correspond to skin (see Figure \ref{img:skinProb}). We first set the probability of the pixels in the face area to zero, because we did not want this to be interfering with finding the hand in the frame. Then we thresholded this image to get rid of areas with very low probability for the skin. Using rough erosion and dilation we got rid of noise and connected the areas that belonged together. This was done roughly because at this step, we just wanted to find the area of the hand and process it separately in a more sophisticated manner. From the resulting image we have selected the biggest blob of pixels that were connected and chose this as the most probable area to correspond to the hand.\\
+       \hspace*{10px} Inspired by \cite{IMS} and \emph{Gijs Molenaar} we implemented a skin \emph{PDF} (probability distribution function) approach. In order to make such a \emph{PDF} we needed to build a histogram (normalizing the histogram would give a \emph{PDF}) of an area that we knew for sure it was representative for the skin color of the person standing in front of the camera. For this we chose to use the face area. Using a frontal face \emph{Haar detector} we were able to find the face of the person standing in front of the camera and we constructed a histogram from the inside area of the rectangle returned by the face detector. We removed the borders in order to loose as much background and hair as possible and get an even more reliable skin \emph{PDF} \todo{and we constructed a histogram of this area (is redundant)}.\\
+       \hspace*{10px} Once we had the histogram, we could backproject it on the image. The resulting image was a gray-scale image showing what areas are more or less probable to correspond to skin (see Figure \ref{img:skinProb} \todo{left}). We first set the probability of the pixels in the face area to zero, because we did not want this to be interfering with finding the hand in the frame. Then we thresholded this image to get rid of areas with very low probability for the skin. Using rough erosion and dilation we got rid of noise and connected the areas that belonged together. This was done roughly because at this step, we just wanted to find the area of the hand and process it separately in a more sophisticated manner. From the resulting image we have selected the biggest blob of pixels that were connected and chose this as the most probable area to correspond to the hand.\\
 		\begin{figure}[!hbtp]
 		   \centering
 		   \includegraphics[width=0.5\textwidth]{hands.png}
 			\caption{Hand detection -- Example}
 			\label{img:skinProb}
 	   	\end{figure}	
-       \hspace*{10px}Once we had the area that corresponded to the hand, we went back to the backprojection image. Here we selected the hand area again to do a more sophisticated thresholding, erosion and dilation on it. After dilation a part of the hand area would end up being white -- corresponding probably to the skin, and another part being black -- probably not skin. The black area was left unchanged while the white area was replaced by the original gray-scale image. The final step was to resize the hand image to \emph{$70\times 70$} pixels to match the training images.\\
-		\hspace*{10px}The resulting image was one in which the hand area was selected and most of the background was removed (see Figure \ref{img:skinProb}).
+       \hspace*{10px}Once we had the area that corresponded to the hand, we went back to the backprojection image. Here we selected the hand area again to do a more sophisticated thresholding, erosion and dilation on it. After dilation a part of the hand area would end up being white -- corresponding probably to the skin, and another part being black -- probably not skin. The black area was left unchanged while the white area was replaced by the original gray-scale image. The final step was to resize the hand image to \emph{$70\times 70$} \todo{70x70 does not look as italic as the one a bit further on} pixels to match the training images.\\
+		\hspace*{10px}The resulting image was one in which the hand area was selected and most of the background was removed (see Figure \ref{img:skinProb} \todo{right image}).
 		%GESTURE RECOGNITION______________________________________________
         \subsection{Gesture recognition}
 		For the gesture recognition task we have started by using a training set containing images of hands of \emph{70$\times$70}px with different backgrounds. The problem proved to be too complex for our classifiers so we have decided to switch to a simpler one which would contain only centered hands and a black background.\\ 
 		\hspace*{10px}Out of this dataset we have extracted the features to be used during the classification.
 		\label{sec:Meth_clssifyHands}
 		\subsubsection{PCA}
-		The first technique we have tried was \emph{PCA}. We have computed the \emph{eigen-hands} of our data and then we have projected each set, separately, on this space.\\
+		The first technique we have tried was \emph{PCA} \todo{maybe add that this was inspired by [1]?}. We have computed the \emph{eigen-hands} of our data and then we have projected each set, separately, on this space.\\
 		\hspace*{10px}There are three steps for generating the \emph{eigen-hands}:
 		\begin{itemize}
 		\item Subtracting the mean of the data
@@ -87,7 +87,7 @@
 		\end{tabular}
 		\end{table}
 
-		The parameter $\lambda$ represents the frequency of the stripes in the wavelet, $\theta$ gives the angle of the stripes, $\psi$ is a translation parameter, $\sigma$ gives the size of the stripes while $\gamma$ indicates how elliptical they are.\\  
+		The parameter $\lambda$ represents the frequency of the stripes in the wavelet, $\theta$ gives the angle of the stripes, $\psi$ is a translation parameter, $\sigma$ gives the size of the stripes while $\gamma$ indicates how elliptical  \todo{they are -> the wavelet is}.\\  
 		\begin{figure}[!hbtp]
 		   \centering
 		   \includegraphics[width=0.5\textwidth]{gabor.png}
@@ -98,7 +98,7 @@
 		\hspace*{10px}Besides using this these 4 \emph{Gabor wavelets} we have also tried concatenating to the result the original image also reshaped on a single row.\\
 		\hspace*{10px}Unlike the \emph{PCA}, this method gave satisfactory results, fact which indicates that it is capable of determining a set of representative features of the training set.
 		\subsubsection{Classification}
-		In order to be able to classify the gesture we have tried using both the \textbf{SVM} (support vector machine) and \textbf{Knn} (K nearest neighbor) classifiers.\\
+		In order to be able to classify the gesture we have tried using both the \textbf{SVM} (support vector machine) and \textbf{Knn} ( \todo{K nearest neighbor -> neighbours with a s, right? }) classifiers.\\
 		\hspace*{10px}Given the fact that the data is not perfectly aligned (hands have slightly different positions in the image and different angles) the problem seemed to be too hard for the \textbf{SVM}. It was not able to find a good boundary between the classes.\\
 		\hspace*{10px}To ensure that our approach was correctly implemented we have created a more aligned training set (the hands had only small differences in the angles of their orientation $ \in [-20, +20]$ degrees). For this task the \textbf{SVM} classifier was able to perfectly classify the data (it found a good boundary between the classes) and it gave an error of \emph{0.0}.\\
 		\hspace*{10px}Because we did not want to restrict the player to only a small amount of positions and ways in which a sign could be made we have decided not to use \textbf{SVM}.\\
@@ -107,8 +107,9 @@
         \subsection{Motion \& Speech on Nao}
 		\label{sec:Meth_naoPlay}
 		\emph{Nao} is a humanoid robot with a processor of 500MhZ and 3 fingers that move simultaneously.\\
+         \todo{Because of the limited computational power we ran our software on a laptop that was connected to Nao. All decissions are made by the software that is running on the laptop and the resulting interaction is sent and executed by Nao.}
 		\hspace*{10px}Because the fingers can only be moved simultaneously we had to represent \emph{"paper"} as hand open, \emph{"rock"} as hand closed and \emph{"scissors"} by closing and opening the hand a few times.\\
-		\hspace*{10px}In order to make \emph{Nao} move and talk we had to generate behavior files using the \emph{"Choregraphe"} component and then to remotely connect to \emph{Nao} using its \emph{IP} address and load one of the predefined behaviors that was needed at that specific moment in the game.\\  
+		\hspace*{10px}In order to make \emph{Nao} move and talk we had to generate behavior files using the \emph{"Choregraphe"} component  \todo{(simulator). These files are then transfered to Nao's memory} and then to remotely connect to \emph{Nao} using its \emph{IP} address and  \todo{load one of -> execute } the predefined behaviors that was needed at that specific moment in the game.\\  
         \hspace*{10px}The hand-detection and gesture recognition parts need to be run in parallel with \emph{Nao}\rq s motion and speech behaviors such that it would be able vocalize the outcome of the game by comparing it\rq s choice of move with the player\rq s one.
 		\begin{figure}[!hbtp]
 		 	\centering
@@ -124,6 +125,7 @@
 		\item \emph{1522} training examples for the \emph{"paper"} sign
 		\item \emph{1377} training examples for the \emph{"scissors"} sign
 		\end{itemize}
+         \todo{The results are obtained using 50-fold cross validation}\\
 		\begin{table}[!hbtp]
 		\begin{tabular}{| c | c | c |}
 			\hline\hline
