@@ -92,25 +92,17 @@
 		\end{table}
 
 		The parameter $\lambda$ represents the frequency of the stripes in the wavelet, $\theta$ gives the angle of the stripes, $\psi$ is a translation parameter, $\sigma$ gives the size of the stripes while $\gamma$ indicates how elliptical they are.\\  
-		\begin{flushleft}
 		\begin{figure}[!hbtp]
 		   \centering
 		   \includegraphics[width=0.45\textwidth]{gabor.png}
 	   	\end{figure}	
-		\end{flushleft}
 		\hspace*{10px}Each image in the training set is convolved with the \emph{Gabor wavelets} and then reshaped as a single row.\\
 		\hspace*{10px}In our project we have used 4 \emph{Gabor wavelets} (with the angle $\theta \in \{0, \frac{\Pi}{4}, \frac{\Pi}{2}, \frac{3\Pi}{4}\}$). Each image was convolved with each one of these 4 wavelets and then reshaped as a row. All 4 results obtained in this manner were then concatenated and stored in single row for each image.\\
 		\hspace*{10px}Besides using this these 4 \emph{Gabor wavelets} we have also tried concatenating to the result the original image also reshaped on a single row.
 		\subsubsection{Classification}
 		\todo{Silvia .....}\\
+		
 
-
-        Do we want subsub sections here?\\\\
-        Build reliable training set\\
-        Find useful features to train on: PCA, Gabor wavelets, grayscale images\\
-        Train a classifier: Knn /SVM\\
-        Create models \& test in order to find the best one\\
-        
         \subsection{Motion \& Speech on Nao}
 		\label{sec:Meth_naoPlay}
         How does Nao play Rock!Paper!Scissors!\\\\
