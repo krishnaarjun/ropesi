@@ -77,9 +77,9 @@
 		\begin{tabular}{| c |}
 			\hline\\
 			\fontfamily{cmbr}\selectfont\scriptsize
-	 		\textbf{$\text{g(x, y, $\lambda$, $\theta$, $\psi$, $\sigma$, $\gamma$) = exp(- $\frac{x\prime^2+\gamma^2y\prime^2}{2\sigma^2}$) cos(2$\Pi$ $\frac{x\prime}{\lambda}$ + $\psi$)} $}\\[10px]
+	 		\textbf{$\text{g(x, y, $\lambda$, $\theta$, $\psi$, $\sigma$, $\gamma$) = exp(- $\frac{x\prime^2+\gamma^2y\prime^2}{2\sigma^2}$) cos(2$\Pi$ $\frac{x\prime}{\lambda}$ + $\psi$)} $}\\[15px]
 			\fontfamily{cmbr}\selectfont\small
-			where $x\prime$ = x cos$\theta$+y sin$\theta$\\
+			where $x\prime$ = x cos$\theta$+y sin$\theta$\\[2px]
 			\fontfamily{ptm}\selectfont\small
 			and $y\prime$ = -x sin$\theta$+y cos$\theta$\\[2px]
 			\hline
@@ -106,13 +106,13 @@
         \subsection{Motion \& Speech on Nao}
 		\label{sec:Meth_naoPlay}
 		\emph{Nao} is a humanoid robot with a processor of 500MhZ and 3 fingers that move simultaneously.\\
-		\hspace*{10px}Because of the limited computational power we had to run our software on a laptop that was connected to \emph{Nao}. All decisions were made by the software that was running on the laptop and the resulting interaction was sent and executed by \emph{Nao}.\\
-		\hspace*{10px}Because the fingers can only be moved simultaneously we had to represent \emph{"paper"} as hand open, \emph{"rock"} as hand closed and \emph{"scissors"} by closing and opening the hand a few times.\\
 		\begin{figure}[!hbtp]
 		 	\centering
 			\includegraphics[width=0.45\textwidth]{Nao.png}
 		 	\caption{Nao Aldebaran}
 	   	\end{figure}			
+		\hspace*{10px}Because of the limited computational power we had to run our software on a laptop that was connected to \emph{Nao}. All decisions were made by the software that was running on the laptop and the resulting interaction was sent and executed by \emph{Nao}.\\
+		\hspace*{10px}Because the fingers can only be moved simultaneously we had to represent \emph{"paper"} as hand open, \emph{"rock"} as hand closed and \emph{"scissors"} by closing and opening the hand a few times.\\
 		\hspace*{10px}In order to make \emph{Nao} move and talk we had to generate behavior files using the \emph{"Choregraphe"} simulator. These files were, then, transfered to \emph{Nao}\rq s memory and then we had to remotely connect to \emph{Nao} using its \emph{IP} address and execute one of the predefined behaviors that was needed at that specific moment in the game.\\  
         \hspace*{10px}The hand-detection and gesture recognition parts need to be run in parallel with \emph{Nao}\rq s motion and speech behaviors such that it would be able vocalize the outcome of the game by comparing it\rq s choice of move with the player\rq s one.
 	%EXPERIMENTAL RESULTS SECTION_______________________________________ 
@@ -128,7 +128,8 @@
 		\begin{table}[!hbtp]
 		\begin{tabular}{| c | c | c |}
 			\hline\hline
-			\textbf{Size} & \textbf{Method} & \textbf{Average Error}\\ 
+			& & \\
+			\textbf{Size} & \textbf{Method} & \textbf{Average Error}\\[5px] 
 			\hline\hline
 			  70$\times$70 & \emph{PCA} & 0.475\\
 			\hline
