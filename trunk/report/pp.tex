@@ -70,9 +70,20 @@
 		\hspace*{10px}Out of this dataset we have extracted the features to be used during the classification.
 		\label{sec:Meth_clssifyHands}
 		\subsubsection{PCA}
-		\todo{Silvia .....}\\
-
+		The first technique we have tried was \emph{PCA}. We have computed the \emph{eigen-hands} of our data and then we have projected each set, separately, on this space.\\
+		\hspace*{10px}There are three steps for generating the \emph{eigen-hands}:
+		\begin{itemize}
+		\item Subtracting the mean of the data
+		\item Computing the covariance of the data and the eigenvectors of the covariance matrix
+		\item Projecting each training set (corresponding to each sign: \emph{"rock"}, \emph{"paper"} or \emph{"scissors"}) on the space defined by the eigenvectors
+		\end{itemize}
+		\hspace*{10px}For high-dimensional data a better approach than computing the eigenvectors of the matrix: \emph{$Data^T \times Data$} (which for a dataset of \emph{[N,D]} with \emph{$D\gg N$} has the dimension \emph{[D,D]}) would be to use an intermediate step and compute the eigenvectors \emph{$V \rightarrow eigh(Data\times Data^T)$} and then determine the final \emph{eigen-space}: \emph{$U \rightarrow \frac{Data^T\times V}{norm(Data^T\times V)}$}.\\
+		\hspace*{10px}Unfortunately, given the fact that \emph{PCA} is not background invariant, translation invariant or orientation invariant the results were not as good as we were expecting.	
 		\subsubsection{Gabor filters}
+		\begin{center} 
+			\boxed{xxxx}
+		\end{center}
+
 		\begin{flushleft}
 		\begin{figure}[!hbtp]
 		   \centering
