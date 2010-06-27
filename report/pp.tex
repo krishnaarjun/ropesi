@@ -126,6 +126,7 @@
 		\item \emph{1522} training examples for the \emph{"paper"} sign
 		\item \emph{1377} training examples for the \emph{"scissors"} sign
 		\end{itemize}
+		Besides using images of $70\times 70$ pixels we have also experimented with images scaled to $20 \times 20$ pixels. This idea proved to be a useful one because the slight difference in the positions of the hands in the images (the hands were not always centered) was considerably reduced and thus the need for translation invariant features was not as important as before. Also the fact that the images had smaller sizes has helped reduce the time required for the sign recognition.\\     
 		The results are obtained using 50--fold cross validation.\\
 		\begin{table}[!hbtp]
 		\begin{tabular}{| c | c | c |}
@@ -154,7 +155,6 @@
 		\caption{Average errors for different methods}
 		\label{tab:res}
 		\end{table}
-		Besides using images of $70\times 70$ pixels we have also experimented with images scaled to $20 \times 20$ pixels. This idea proved to be a useful one because the slight difference in the positions of the hands in the images (the hands were not always centered) was considerably reduced and thus the need for translation invariant features was not as important as before. Also the fact that the images had smaller sizes has helped reduce the time required for the sign recognition.\\     
 		\hspace*{10px}In Table~\ref{tab:res} are depicted the average errors we have obtained while testing our methods. We can notice from here that the \emph{PCA} tends to perform worst than the other methods. It can also be observed that the \emph{Gabor wavelets} have a high prediction accuracy and that the best results are obtained when concatenating the convolved images of \emph{Gabor wavelets} with the original image for the size of \emph{$20\times20$}px.  
 	%CONCLUSIONS & FARTHER WORK SECTION________________________________
     \section{Conclusions}
