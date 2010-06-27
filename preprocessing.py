@@ -130,6 +130,8 @@ class preprocessing:
 					cv.Save("data_train/Gabor/"+aSign+"Train"+str(self.pca.sizeImg)+".dat", self.pca.array2cv(finalConv,False))
 				else:
 					cv.Save("data_train/Gabor/"+aSign+"Train"+str(self.pca.sizeImg)+".dat", self.pca.array2cv(signSet,False))
+		else: 
+			finalConv = convo
 		return finalConv
 	#________________________________________________________________________
 	#prepare the data with multiple Gabor filters for SVM
@@ -138,12 +140,12 @@ class preprocessing:
 		
 		#1) compute a set of different gabor filters
 		lambdas = 4.0 #between 2 and 256
-		gammas  = 0.8 # between 0.2 and 1 
-		psis    = 20 #between 0 and 180 
+		gammas  = 0.7 # between 0.2 and 1 
+		psis    = 10 #between 0 and 180 
 		thetas  = [0,(numpy.pi/4.0),(numpy.pi/2.0),(numpy.pi*3.0/4.0)] #between (0 and 180) or (-90 and +90)
 		if(self.pca.sizeImg == 20):
 			sigmas = 2.0 #between 3 and 68
-			sizes  = 1.0 #between 1 and 10
+			sizes  = 2.0 #between 1 and 10
 		else:
 			sigmas = 3.0 #between 3 and 68
 			sizes  = 2.0 #between 1 and 10
@@ -168,8 +170,8 @@ class preprocessing:
 			
 		#5) do PCA on the concatenated (convolved+original) images 
 		finalConv = None
-		if(isPCA == True): #not the test image
-			if(data.shape[0]>1):					
+		if(isPCA == True): #with PCA 
+			if(data.shape[0]>1): #not the test image					
 				self.pca.doPCA(convo, self.noComp, "GaborImg/")
 			else:
 				finalConv = self.pca.projPCA(convo, False, "GaborImg/", "")
@@ -186,6 +188,8 @@ class preprocessing:
 					cv.Save("data_train/GaborImg/"+aSign+"Train"+str(self.pca.sizeImg)+".dat", self.pca.array2cv(finalConv,False))
 				else:
 					cv.Save("data_train/GaborImg/"+aSign+"Train"+str(self.pca.sizeImg)+".dat", self.pca.array2cv(signSet,False))
+		else: 
+			finalConv = convo
 		return finalConv
 #____________________________________________________________________________________________
 
