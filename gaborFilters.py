@@ -72,10 +72,9 @@ class gaborFilters:
 				gabor[x+int(xMin),y+int(yMin)] = numpy.exp(-0.5*((xPrime*xPrime)/(sigmaX*sigmaX)+(yPrime*yPrime)/(sigmaY*sigmaY)))*numpy.cos(2.0*numpy.pi/self.lambd*xPrime+self.psi)
 		if(isPrint == True):
 			mini   = numpy.min(gabor)
-			showG  = gabor+numpy.abs(mini)
+			showG  = gabor - mini
 			maxi   = numpy.max(showG)
-			showG  = numpy.divide(showG, maxi)
-			showG  = numpy.dot(showG, 255)
+			showG  = numpy.multiply(showG, 255.0/float(maxi))
 			imageG = self.pca.array2cv(showG,True)
 			cv.NamedWindow("gabor", 1)
 			cv.ShowImage("gabor", imageG)
