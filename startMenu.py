@@ -16,6 +16,7 @@ from gaborFilters import *
 from preprocessing import *
 from classifyHands import *
 from predictSign import *
+from skinFinder import *
 
 print "Please choose:"
 print "\t1 => check PCA on original images"
@@ -25,7 +26,8 @@ print "\t4 => generate data convolved with multiple Gabor wavelets"
 print "\t5 => generate data convolved with multiple Gabor wavelets + concatenated with the original image"
 print "\t6 => do some classifications (SVN)"
 print "\t7 => do some classifications (Knn)"
-print "\t8 => create the FINAL models for classifiers\n"
+print "\t8 => create the FINAL models for classifiers"
+print "\t9 => detect hands & predict\n"
 choice   = raw_input('your choice... ') 
 sizeImg  = raw_input('the size of the training images ...')   
 build    = raw_input('build the training matrixes (y/n) ...')   
@@ -57,7 +59,7 @@ elif(int(choice) == 2):
 	dataset = raw_input('choose the dataset (r/p/s) ...')
 	datas   = {'r':'rock', 'p':'paper', 's':'scissors'} 
 	gabor   = gaborFilters(buildOpt[str(build)],int(sizeImg))
-	gabor.setParameters(10, 1.0, 10, -45, 8.0, 2)
+	gabor.setParameters(0.4, 0.8, 20, (numpy.pi*3.0/4.0), 5.0, 4.0)
 	data    = cv.Load("data_train/"+datas[dataset]+"Train"+str(sizeImg)+".dat")
 	gabor.convolveImg(data, True)
 #____________________________________________________________________________________________________
@@ -75,7 +77,7 @@ elif(int(choice) == 4):
 	hands   = eigenHands(int(sizeImg))
 	_,data,txtLabels = hands.justGetDataMat(datas[dataset][0],"",False)
 	prep    = preprocessing(int(sizeImg),int(noComp))
-	prep.doManyGabors(data,txtLabels,dataset, True)
+	prep.doManyGabors(data,txtLabels,dataset, False)
 #____________________________________________________________________________________________________
 
 elif(int(choice) == 5):
@@ -85,7 +87,8 @@ elif(int(choice) == 5):
 	hands   = eigenHands(int(sizeImg))
 	_,data,txtLabels = hands.justGetDataMat(datas[dataset][0],"",False)
 	prep    = preprocessing(int(sizeImg),int(noComp))
-	prep.doSmallManyGabors(data,txtLabels,dataset,True)
+	prep.doSmallManyGabors(data,txtLabels,dataset,False)
+	#prep.doSmallManyGabors(data[0:1,:],None,"",False)
 #____________________________________________________________________________________________________
 
 elif(int(choice) == 6):
@@ -110,11 +113,15 @@ elif(int(choice) == 8):
 	datas    = {'c':'rock', 'h':'hands'} 
 	modelOpt = {'s':'svm', 'k':'knn'} 
 	typeu    = raw_input('choose the data 1 => original images; 2 => PCA on initial images; 3 => multiple Gabor filters + orig img; 4 => just multiple Gabor Filters...')
-	if(typeu == "3" or typeu == 4):
+	if(typeu == "3" or typeu == "4"):
 		noComp = raw_input('number of components for PCA no ...')
 	else:
 		noComp = 0
 	predict  = predictSign(int(sizeImg),buildOpt[str(build)], int(noComp))
 	predict.storeModel(modelOpt[str(model)], datas[dataset], int(typeu))
-	
+#____________________________________________________________________________________________________
+
+elif(int(choice) == 9):
+	skin = detectSkin()
+	skin.findSkin()
 
