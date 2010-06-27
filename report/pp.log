@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2010.6.3)  27 JUN 2010 16:50
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2010.6.3)  27 JUN 2010 16:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -485,39 +485,42 @@ Overfull \hbox (5.0pt too wide) in paragraph at lines 94--95
 File: Nao.png Graphic file (type png)
 
 <use Nao.png>
-Overfull \hbox (2.70172pt too wide) in paragraph at lines 131--154
+Overfull \hbox (2.70172pt too wide) in paragraph at lines 132--155
 [][] 
  []
 
-[4 <./Nao.png (PNG copy)>] [5] (./pp.aux) ) 
+
+Underfull \vbox (badness 1430) has occurred while \output is active []
+
+ [4 <./Nao.png (PNG copy)>] [5] (./pp.aux) ) 
 Here is how much of TeX's memory you used:
  7219 strings out of 495061
  97054 string characters out of 1182622
- 186550 words of memory out of 3000000
+ 189550 words of memory out of 3000000
  10256 multiletter control sequences out of 15000+50000
  29828 words of font info for 79 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
  36i,16n,38p,928b,331s stack positions out of 5000i,500n,10000p,200000b,50000s
- </home/laly/.texmf-var/fonts/pk/ljf
-our/jknappen/ec/ecbi1095.600pk>{/usr/share/texmf-texlive/fonts/enc/dvips/base/8
-r.enc} </home/laly/.texmf-var/fonts/pk/ljfour/public/cmbright/ebmr10.600pk> </h
-ome/laly/.texmf-var/fonts/pk/ljfour/public/cmbright/ebsr8.600pk> </home/laly/.t
-exmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk> </home/laly/.texmf-var/fon
-ts/pk/ljfour/jknappen/ec/ecbx1095.600pk> </home/laly/.texmf-var/fonts/pk/ljfour
-/jknappen/ec/ecti1095.600pk> </home/laly/.texmf-var/fonts/pk/ljfour/jknappen/ec
-/ecrm1095.600pk> </home/laly/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.60
-0pk> </home/laly/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </home/
-laly/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1728.600pk></usr/share/texmf-te
-xlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/fonts
-/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/fonts/type1/publi
-c/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/c
-m/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.pfb><
-/usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/te
-xmf-texlive/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/f
-onts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/
-public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfo
-nts/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb>
-Output written on pp.pdf (5 pages, 465693 bytes).
+ </home/laly/.texmf-var/fonts/pk/lj
+four/jknappen/ec/ecbi1095.600pk>{/usr/share/texmf-texlive/fonts/enc/dvips/base/
+8r.enc} </home/laly/.texmf-var/fonts/pk/ljfour/public/cmbright/ebmr10.600pk> </
+home/laly/.texmf-var/fonts/pk/ljfour/public/cmbright/ebsr8.600pk> </home/laly/.
+texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk> </home/laly/.texmf-var/fo
+nts/pk/ljfour/jknappen/ec/ecbx1095.600pk> </home/laly/.texmf-var/fonts/pk/ljfou
+r/jknappen/ec/ecti1095.600pk> </home/laly/.texmf-var/fonts/pk/ljfour/jknappen/e
+c/ecrm1095.600pk> </home/laly/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.6
+00pk> </home/laly/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </home
+/laly/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1728.600pk></usr/share/texmf-t
+exlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/font
+s/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/fonts/type1/publ
+ic/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/
+cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.pfb>
+</usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/t
+exmf-texlive/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/
+fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1
+/public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-texlive/fonts/type1/public/amsf
+onts/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb>
+Output written on pp.pdf (5 pages, 465615 bytes).
 PDF statistics:
  392 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
