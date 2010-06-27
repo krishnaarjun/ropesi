@@ -128,9 +128,9 @@ class eigenHands:
 
 			#6) normalize the backprojection
 			mini   = numpy.min(backX)
-			backX += abs(mini)
+			backX -= mini
 			maxi   = numpy.max(backX)
-			backX  = numpy.multiply(backX, float(255)/float(abs(maxi)))
+			backX  = numpy.multiply(backX, float(255.0)/float(abs(maxi)))
 			
 			#7) Shot the backprojected image
 			eigenHand = self.array2cv(backX[0:1,:],True)
