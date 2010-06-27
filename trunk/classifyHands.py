@@ -89,9 +89,9 @@ class classifyHands:
 					sizeSoFar += bad[j].shape[0]
 					j         += 1
 					ind        = (i-good.shape[0])-sizeSoFar
+				train[i,:] = bad[j][ind,:]
 				if(isMulti == True):
 					labels[i] += (j+1)
-				train[i,:] = bad[j][ind,:]
 		return indexs,labels,train
 
 	#________________________________________________________________________
