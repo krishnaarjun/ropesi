@@ -86,9 +86,11 @@ class predictSign:
 				indexs,labels,train = self.classify.getDataLabels(onImg, theSign, True)
 			else:
 				indexs,labels,train = self.classify.getDataLabels(onImg, theSign, False)
+		
+			print train.shape
 
 			#1) initialize the svm and compute the model
-			problem = mlpy.Knn(5, dist='se')
+			problem = mlpy.Knn(4, dist='se')
 
 			#2) shuffle input data to do the 10-fold split 
 			shuffle(indexs)
@@ -96,7 +98,10 @@ class predictSign:
 			train  = train[indexs,:] 
 
 			#3) generate the Knn model
-			learned   = problem.compute(train, labels)
+			learned   = problem.compute(train, labels)			
+
+			print train.shape
+
 			modelFile = open("classi_models/"+str(self.pca.sizeImg)+"Knn_"+str(theSign)+str(onImg)+".dat", "wb")
 			pickle.dump(problem, modelFile)
 			modelFile.close()
@@ -121,6 +126,9 @@ class predictSign:
 		zaTime     = cv.GetTickCount() 
 		testImg    = self.preprocessImg(image, zaType)
 		prediction = problem.predict(testImg)
+
+		print prediction
+
 		zaTime     = cv.GetTickCount() - zaTime
 	    	totalTime += zaTime/(cv.GetTickFrequency()*1000.0)
 		if((what!="hands") or (prediction[0]==0 and what=="hands")):	
@@ -139,14 +147,15 @@ class predictSign:
 			return self.pca.cv2array(imgMat,True)
 		elif(zaType == 2): # PCA over the original images
 			return self.pca.projPCA(self.pca.cv2array(imgMat,True), False, "PCA/", "")		
-		elif(zaType == 3): # convolve with 8 kernels and add the original image NO PCA
-			return self.prep.doSmallManyGabors(pca.cv2array(imgMat,True), None, "",False)	
-		elif(zaType == 4): # convolve with 8 kernels NO PCA
+		elif(zaType == 3): # convolve with 4 kernels and add the original image -- NO PCA
+			return self.prep.doSmallManyGabors(self.pca.cv2array(imgMat,True), None, "",False)	
+		elif(zaType == 4): # convolve with 4 kernels -- NO PCA
 			return self.prep.doManyGabors(self.pca.cv2array(imgMat,True), None, "",False)			
-		elif(zaType == 5): # convolve with 8 kernels and add the original image and PCA
-			return self.prep.doManyGabors(self.pca.cv2array(imgMat,True), None, "",True)
-		elif(zaType == 4): # convolve with 8 kernels and PCA
-			return self.prep.doManyGabors(self.pca.cv2array(imgMat,True), None, "",True)			
+
+		#elif(zaType == 5): # convolve with 4 kernels and add the original image and PCA
+		#	return self.prep.doManyGabors(self.pca.cv2array(imgMat,True), None, "",True)
+		#elif(zaType == 6): # convolve with 4 kernels and PCA
+		#	return self.prep.doManyGabors(self.pca.cv2array(imgMat,True), None, "",True)			
 
 #________________________________________________________________________
 	
