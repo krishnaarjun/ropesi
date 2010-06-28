@@ -30,21 +30,26 @@ skin  = detectSkin()
 goNao = Gesture()
 
 #2) MAKE MULTI THREADS SO THE SKIN FINDER AND NAO INITIALIZE AND RUN IN PARALLEL
+aLock = thread.allocate_lock()
+aLock.acquire(1)
 try:
 	thread.start_new_thread(skin.findSkin, ())
 except:
 	print "error for skin finder"
-
+	aLock.release()	
 goNao.naoBehaviors("demo")
-for i in range(0,3):
-	#3) RESET THE VARIABLES 
+for i in range(0,3):	
+	#3) LET'S PLAY NOW___________________	
+	goNao.naoBehaviors("play")
+	
+	#4) RESET THE VARIABLES 
+	aLock.release()	
+	aLock.acquire(1)		
 	try:
 		thread.start_new_thread(skin.reinitGame, ())
 	except:
 		print "error for skin init"
-
-	#4) LET'S PLAY NOW___________________
-	goNao.naoBehaviors("play")
+		aLock.release()	
 	
 	#5) PREDICT WHO PLAYED WHAT_________________	
 	goNao.naoBehaviors("move")
@@ -65,7 +70,11 @@ for i in range(0,3):
 			goNao.naoBehaviors("lost")
 		elif(skin.maximum == "scissors" and goNao.naoMove == 1):
 			goNao.naoBehaviors("won")
-		
+
+#release the lock
+aLock.release()			
+# ;)
+#goNao.naoBehaviors("job")
 
 
 
