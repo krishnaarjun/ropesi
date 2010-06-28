@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="1">
+    <Box>
+        <name>root</name>
+        <robot></robot>
+        <id>-1</id>
+        <tooltip>Root box of Choregraphe&apos;s project. Highest level possible.</tooltip>
+        <bitmap_expanded>1</bitmap_expanded>
+        <Bitmaps>
+            <bitmap>media/images/box/root.png</bitmap>
+        </Bitmaps>
+        <plugin></plugin>
+        <x>0</x>
+        <y>0</y>
+        <script>
+            <content>
+                <![CDATA[]]>
+</content>
+            <language>4</language>
+        </script>
+        <Input>
+            <name>onLoad</name>
+            <type>1</type>
+            <type_size>1</type_size>
+            <nature>0</nature>
+            <inner>1</inner>
+            <tooltip>Signal sent when diagram is loaded.</tooltip>
+            <id>1</id>
+        </Input>
+        <Input>
+            <name>onStart</name>
+            <type>1</type>
+            <type_size>1</type_size>
+            <nature>2</nature>
+            <inner>0</inner>
+            <tooltip>Box behavior starts when a signal is received on this input.</tooltip>
+            <id>2</id>
+        </Input>
+        <Input>
+            <name>onStop</name>
+            <type>1</type>
+            <type_size>1</type_size>
+            <nature>3</nature>
+            <inner>0</inner>
+            <tooltip>Box behavior stops when a signal is received on this input.</tooltip>
+            <id>3</id>
+        </Input>
+        <Output>
+            <name>onStopped</name>
+            <type>1</type>
+            <type_size>1</type_size>
+            <nature>1</nature>
+            <inner>0</inner>
+            <tooltip>Signal sent when box behavior is finished.</tooltip>
+            <id>4</id>
+        </Output>
+        <Timeline>
+            <fps>10</fps>
+            <resources_acquisition>0</resources_acquisition>
+            <size>300</size>
+            <enable>0</enable>
+            <start_frame>0</start_frame>
+            <end_frame>-1</end_frame>
+            <Waveforms />
+            <scale>10</scale>
+            <watches />
+            <BehaviorLayer>
+                <name>behavior_layer1</name>
+                <mute>0</mute>
+                <BehaviorKeyframe>
+                    <name>keyframe1</name>
+                    <index>1</index>
+                    <bitmap></bitmap>
+                    <Diagram>
+                        <scale>-1</scale>
+                        <Box>
+                            <name>Say</name>
+                            <robot></robot>
+                            <id>1</id>
+                            <tooltip>Say the sentence asked. See box parameters for fine tuning of the voice.</tooltip>
+                            <bitmap_expanded>1</bitmap_expanded>
+                            <Bitmaps>
+                                <bitmap>media/images/box/interaction/say.png</bitmap>
+                            </Bitmaps>
+                            <plugin></plugin>
+                            <x>197</x>
+                            <y>233</y>
+                            <script>
+                                <content>
+                                    <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.tts = ALProxy('ALTextToSpeech')
+        self.ttsStop = ALProxy('ALTextToSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+        
+    def onLoad(self):
+        #puts code for box cleanup here
+        self.ids = []
+        
+    def onUnload(self):
+        #puts code for box cleanup here    
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        
+    def onInput_onStart(self):
+        sentence = "\RSPD="+ str( self.getParameter("speed") )+ "\ "
+        sentence += "\VCT="+ str( self.getParameter("Voice Shaping") ) + "\ " 
+        sentence += self.getParameter("text")
+        sentence +=  "\RST\ "
+        id = self.tts.post.say(str(sentence))
+        self.ids.append(id)
+        self.tts.wait(id, 0)
+        self.ids.remove(id)
+        self.onStopped() # activate output of the box
+
+    def onInput_onStop(self):
+        self.onUnload()]]>
+</content>
+                                <language>4</language>
+                            </script>
+                            <Input>
+                                <name>onLoad</name>
+                                <type>1</type>
+                                <type_size>1</type_size>
+                                <nature>0</nature>
+                                <inner>1</inner>
+                                <tooltip>Signal sent when Diagram is loaded.</tooltip>
+                                <id>1</id>
+                            </Input>
+                            <Input>
+                                <name>onStart</name>
+                                <type>1</type>
+                                <type_size>1</type_size>
+                                <nature>2</nature>
+                                <inner>0</inner>
+                                <tooltip>Box behavior starts when a signal is received on this Input.</tooltip>
+                                <id>2</id>
+                            </Input>
+                            <Input>
+                                <name>onStop</name>
+                                <type>1</type>
+                                <type_size>1</type_size>
+                                <nature>3</nature>
+                                <inner>0</inner>
+                                <tooltip>Box behavior stops when a signal is received on this Input.</tooltip>
+                                <id>3</id>
+                            </Input>
+                            <Output>
+                                <name>onStopped</name>
+                                <type>1</type>
+                                <type_size>1</type_size>
+                                <nature>1</nature>
+                                <inner>0</inner>
+                                <tooltip>Signal sent when Box behavior is finished.</tooltip>
+                                <id>4</id>
+                            </Output>
+                            <Parameter>
+                                <name>text</name>
+                                <inherits_from_parent>0</inherits_from_parent>
+                                <content_type>3</content_type>
+                                <value>i won</value>
+                                <default_value>Hello</default_value>
+                                <custom_choice>0</custom_choice>
+                                <tooltip>Text to synthesize.</tooltip>
+                                <id>5</id>
+                            </Parameter>
+                            <Parameter>
+                                <name>Voice Shaping</name>
+                                <inherits_from_parent>0</inherits_from_parent>
+                                <content_type>1</content_type>
+                                <value>100</value>
+                                <default_value>100</default_value>
+                                <min>50</min>
+                                <max>150</max>
+                                <tooltip>This tag is used to modify at runtime the voice feature (tone, speed) in way slightly different of what pitch and speed modification does, giving a kind of &quot;gender or age modification &quot; effect.&#x0A;&#x0A;To better tune the effect, one should compensate the speed modification due to the value parameter. For exemple to keep an average constant speed, one should add 20% to speed parameter when decreasing 20% to the Voice Shaping (VCT) parameter :&#x0A;&#x0A;A quite good male derivation of female voice for example could be obtained using the following parameters: VCT=78.</tooltip>
+                                <id>6</id>
+                            </Parameter>
+                            <Parameter>
+                                <name>speed</name>
+                                <inherits_from_parent>0</inherits_from_parent>
+                                <content_type>1</content_type>
+                                <value>100</value>
+                                <default_value>100</default_value>
+                                <min>50</min>
+                                <max>200</max>
+                                <tooltip>change the speed of the voice</tooltip>
+                                <id>7</id>
+                            </Parameter>
+                        </Box>
+                        <Link>
+                            <inputowner>1</inputowner>
+                            <indexofinput>2</indexofinput>
+                            <outputowner>0</outputowner>
+                            <indexofoutput>2</indexofoutput>
+                        </Link>
+                        <Link>
+                            <inputowner>0</inputowner>
+                            <indexofinput>4</indexofinput>
+                            <outputowner>1</outputowner>
+                            <indexofoutput>4</indexofoutput>
+                        </Link>
+                    </Diagram>
+                </BehaviorKeyframe>
+            </BehaviorLayer>
+            <ActuatorList />
+        </Timeline>
+    </Box>
+</ChoregrapheProject>
