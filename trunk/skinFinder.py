@@ -11,26 +11,24 @@ class detectSkin:
 		self.predictions = {"rock":0, "paper":0, "scissors":0, "garb":0, "none":0}
 		self.maximum     = ""
 		self.maxnr       = 0
-			self.goalImg     = cv.CreateImage((70,70), cv.IPL_DEPTH_8U, 1)
+		self.goalImg     = cv.CreateImage((70,70), cv.IPL_DEPTH_8U, 1)
 		self.predict     = predictSign(20, False, 0) # takes the size of the images as input
 		#load the model of the classification
-		#self.problem_hand = self.predict.loadModel("knn", 1, "hands") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets   
-		#self.problem_sign = self.predict.loadModel("knn", 1, "rock") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets
-		self.problem_sign = self.predict.loadModel("knn", 3, "rock") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets 
+		#self.problem_hand = self.predict.loadModel("knn", 1, "hands") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
+		self.problem_sign = self.predict.loadModel("knn", 1, "rock") # 1=>original images; 2=>PCA; 3=>Gabor Wavelets+original image; 4=>only Gabor Wavelets	
 
-	 #__________________________________________________________
+   #__________________________________________________________
 
 	def reinitGame(self):
-		#print "REINIT IN SKIN DETECT"  
-
+#	print "REINIT IN SKIN DETECT"	
 		self.predictions = {"rock":0, "paper":0, "scissors":0, "garb":0, "none":0}
 		self.maximum     = ""
-		self.maxnr       = 0    
-	 #__________________________________________________________
+		self.maxnr       = 0	
+   #__________________________________________________________
 
-	def findSkin(self):     
-		#print "finding skin"   
-		#skin detector from now on 
+	def findSkin(self): 	
+#	print "finding skin"   
+	#skin detector from now on 
 		capture = cv.CreateCameraCapture(int(0))
 		cascade = cv.Load("haarcascades/haarcascade_frontalface_alt.xml")
 		
@@ -38,7 +36,7 @@ class detectSkin:
 		totalTime   = 0
 		frameCount  = 0
 		totalTime   = 0
-		imageResize = 0.5
+		imageResize = 0.4
 		hasHist     = False
 		showImgs    = False
 		
@@ -126,24 +124,24 @@ class detectSkin:
 				t = cv.GetTickCount() - t
 				totalTime += t/(cv.GetTickFrequency()*1000.)
 				
-		#save image for train
-		#cv.SaveImage("train/aa345camera"+str(frameCount)+".jpg", self.goalImg) 
+				#save image for train
+				#cv.SaveImage("train/aa345camera"+str(frameCount)+".jpg", self.goalImg)	
 
-		#does the prediction on the given image of hand
-		#whatPred = self.predict.doPrediction(1, "knn", self.problem_hand, "hands", self.goalImg)
-		#if(whatPred == "hands"):
-		whatPred = self.predict.doPrediction(3, "knn", self.problem_sign, "rock", self.goalImg)
-		self.predictions[whatPred] += 1 
-		for (key,values) in self.predictions.items():
-			if(values>self.maxnr):
-				self.maximum = key
-				self.maxnr   = values
+				#does the prediction on the given image of hand
+				#whatPred = self.predict.doPrediction(1, "knn", self.problem_hand, "hands", self.goalImg)
+				#if(whatPred == "hands"):
+				whatPred = self.predict.doPrediction(1, "knn", self.problem_sign, "rock", self.goalImg)
+				self.predictions[whatPred] += 1 
+				for (key,values) in self.predictions.items():
+					if(values>self.maxnr):
+						self.maximum = key
+						self.maxnr   = values
 
-		if frameCount%10==0:
+				if frameCount%10==0:
 					print "after %i frames the average time = %gms" % (frameCount, totalTime/frameCount)
 	
 				if cv.WaitKey(10) >= 0:
-					break   
+					break	
 	#________________________________________________
 	
 	def findFace(self,img,cascade):       
@@ -297,6 +295,7 @@ class detectSkin:
 		return bestCandidateRect
 			
 	def makeHandImageSquare(self,bestCandidateRect,frameSmall,frameCount,skinProbImgOriginal,showImgs):
+		hand70x70 = cv.CreateImage((70,70), 8, 1)
 		if bestCandidateRect != (0,0,0,0):
 			cv.SetImageROI(skinProbImgOriginal, bestCandidateRect);
 			cv.SetImageROI(frameSmall, bestCandidateRect);
@@ -342,13 +341,12 @@ class detectSkin:
 					else:
 						handSquare[y,x] = 0
 
-			hand70x70 = cv.CreateImage((70,70), 8, 1)
+			
 			cv.Resize(handSquare,hand70x70,cv.CV_INTER_LINEAR)
-		self.goalImg = hand70x70    
-			return hand70x70
+		self.goalImg = hand70x70	
+		return hand70x70
 					
-#if __name__ == '__main__':
-	#cProfile.run('detectSkin()')
-#skin = detectSkin()
-#skin.findSkin()    
-#
+if __name__ == '__main__':
+#    cProfile.run('detectSkin()')
+	detectSkin()
+	
