@@ -26,8 +26,7 @@ class Gesture:
 		self.position  = "stand"
 		self.counter   = 0
 		self.naoMove   = 0
-		self.possBHVRS = ["demonstrate_rock.xar","demonstrate_paper.xar","demonstrate_scissors.xar","move_rpsBeginGame.xar","move_rock.xar","move_paper.xar",
-"move_scissors.xar","letsPlay.xar","iwon1.xar","iwon2.xar","iwon2.xar","uwon1.xar","uwon2.xar","uwon3.xar","equal1.xar","equal2.xar", "startDemo.xar"]
+		self.possBHVRS = {"demoRock":"demonstrate_rock.xar", "demoPaper":"demonstrate_paper.xar", "demoScissors":"demonstrate_scissors.xar", "rps":"move_rpsBeginGame.xar", "doMove":["move_rock.xar","move_paper.xar","move_scissors.xar"], "letsPlay":"letsPlay.xar", "nao_won":["iwon1.xar","iwon2.xar","iwon2.xar"], "nao_lost":["uwon1.xar","uwon2.xar","uwon3.xar"], "equal":["equal1.xar","equal2.xar"], "handUp":"startDemo.xar", "handDown":"prePlay.xar", "preSign":"preSign.xar", "job":"vanessa.xar"}
 		self.connectNao()
 	#____________________________________________________________
 
@@ -45,8 +44,9 @@ class Gesture:
 		gesture_id = self.frame.newBehaviorFromFile(gesture_path, "")
 		self.motion.stiffnessInterpolation("Body", 1.0, 1.0)
 		self.frame.playBehavior(gesture_id)
-		if(what != "demo"):
-			self.frame.completeBehavior(gesture_id)
+		#if(what != "demo"):
+		self.frame.completeBehavior(gesture_id)
+
 		self.after_effects("")
 	#____________________________________________________________
 
@@ -58,35 +58,50 @@ class Gesture:
 	#____________________________________________________________
 
 	def naoBehaviors(self, what):
-		print "NAO BAHVIORS CHOOSING ..."+str(what)
+#		print "NAO BAHVIORS CHOOSING ..."+str(what)
 		if(what is "demo"):
-			doBehavior = self.possBHVRS[16]
+			doBehavior = self.possBHVRS["handUp"]
 			self.send_command(doBehavior, what)
 			
-			doBehavior = self.possBHVRS[0]
+			doBehavior = self.possBHVRS["demoRock"]
 			self.send_command(doBehavior, what)
-			doBehavior = self.possBHVRS[1]
+			doBehavior = self.possBHVRS["demoPaper"]
 			self.send_command(doBehavior, what)
-			doBehavior = self.possBHVRS[2]
+			doBehavior = self.possBHVRS["demoScissors"]
+			self.send_command(doBehavior, what)					
+
+			#go to default state
+			doBehavior = self.possBHVRS["handDown"]
+			self.send_command(doBehavior, what) 
+		elif(what is "play"):			
+			doBehavior = self.possBHVRS["letsPlay"]
 			self.send_command(doBehavior, what)
-		elif(what is "play"):
-			doBehavior = self.possBHVRS[7]
-			self.send_command(doBehavior, what)
-			doBehavior = self.possBHVRS[3]
+			doBehavior = self.possBHVRS["rps"]
 			self.send_command(doBehavior, what)
 		elif(what is "move"):
-			self.naoMove = random.randint(0,2)	
-			doBehavior   = self.possBHVRS[self.naoMove+4]
+			#go to default state before move
+			print "go count signs >>>"
+			self.naoMove = random.randint(0,2)
+			doBehavior   = self.possBHVRS["doMove"][self.naoMove]
 			self.send_command(doBehavior, what)            
 		elif(what is "lost"):
-			doBehavior = self.possBHVRS[random.randint(0,2)+8]
+			doBehavior = self.possBHVRS["nao_won"][random.randint(0,2)]
 			self.send_command(doBehavior, what)            
 		elif(what is "won"):
-			doBehavior = self.possBHVRS[random.randint(0,2)+11]
+			doBehavior = self.possBHVRS["nao_lost"][random.randint(0,2)]
 			self.send_command(doBehavior, what)            
 		elif(what is "equal"):
-			doBehavior = self.possBHVRS[random.randint(0,1)+14]
+			doBehavior = self.possBHVRS["equal"][random.randint(0,1)]
 			self.send_command(doBehavior, what) 
+		elif(what is "job"):
+			#go to default state
+			doBehavior = self.possBHVRS["handDown"]
+			self.send_command(doBehavior, what) 
+
+			doBehavior = self.possBHVRS["job"]
+			self.send_command(doBehavior, what) 
+
 #____________________________________________________________
 
+#Gesture(True,False)
 
