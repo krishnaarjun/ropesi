@@ -25,12 +25,13 @@ class Gesture:
 	def __init__(self, host, port):
 		self.host         = host
 		self.port         = port
-		self.lastvalue    = [0,0,0]
-		self.counter      = 0
 		self.stiffness    = 1.0
 		self.naoMove      = 0
+
+		self.frame        = None
 		self.voice        = "Heather22Enhanced"
 		self.speechDevice = None
+		self.motion       = None
 		self.possBHVRS    = {"handUp":"hand_up.xar", "demoRock":"demonstrate_rock.xar", "demoPaper":"demonstrate_paper.xar", \
 							"demoScissors":"demonstrate_scissors.xar", "handDown":"hand_down.xar", \
 							"doMove":["move_rock.xar","move_paper.xar","move_scissors.xar"]}
@@ -55,7 +56,7 @@ class Gesture:
 		    print "Error when creating motion device proxy:"+str(e)
 		    exit(1)
 		#MAKE NAO STIFF (OTHERWISE IT WON'T MOVE)
-		self.motionDevice.stiffnessInterpolation("Body",self.stiffness,1.0)
+		self.motion.stiffnessInterpolation("Body",self.stiffness,1.0)
 
 
 		#CONNECT TO A SPEECH PROXY
