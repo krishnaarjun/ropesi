@@ -26,7 +26,7 @@ import thread
 
 #_____________________________________________________________________
 #1) CONNECT TO NAO AND INITIALIZE CLASS SKIN
-ipAdd = raw_input("Please write Nao's IP address... ') 
+ipAdd = raw_input("Please write Nao's IP address... ") 
 print "\nPlease choose an action:"
 print "\td => Run the demonstration of Nao's gestures during the play"
 print "\tp => Play rock,paper&scissors with Nao"
