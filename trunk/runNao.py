@@ -9,7 +9,7 @@ if path == "None":
 	sys.exit(1)
 else:
 	#import naoqi lib
-	alPath = "/data/Documents/semester2/AIProject/nao/lib"
+	alPath = "/data/Documents/nao/lib"
 	#alPath = "C:\Program Files\Aldebaran\Choregraphe 1.6.13\lib"
 	sys.path.append(alPath)
 	import naoqi
