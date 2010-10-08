@@ -77,7 +77,6 @@ elif(choice == "p"):
 			goNao.naoBehaviors("win")
 		elif(skin.maximum == "scissors" and goNao.naoMove == 1):
 			goNao.naoBehaviors("loose")
-
 	# finally release the lock
 	aLock.release()				
 	goNao.releaseNao()
