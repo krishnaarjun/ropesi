@@ -8,6 +8,7 @@ import time
 
 class detectSkin:
 	def __init__(self):
+		self.stopGame    = False
 		#most predicted:
 		self.predictions = {"rock":0, "paper":0, "scissors":0, "garb":0, "none":0}
 		self.maximum     = ""
@@ -46,8 +47,10 @@ class detectSkin:
 		if capture:
 			inputFrame = None
 			while True:
+				if(self.stopGame == True):
+					break	
+
 				frameCount+=1
-				
 				if frameCount%20==0 or frameCount==10:
 					hasHist = False
 

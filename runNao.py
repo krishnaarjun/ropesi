@@ -85,8 +85,10 @@ elif(choice == "p"):
 			elif(skin.maximum == "scissors" and goNao.naoMove == 1):
 				goNao.naoBehaviors("loose")
 		initThread.join()
-		if(not skinThread.isAlive()):
-			break	
+		if(i == 2):
+			skinLock.acquire(1)
+			skin.stopGame = True	
+			skinLock.release()
 	skinThread.join()	
 	goNao.releaseNao()
 

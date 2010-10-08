@@ -108,12 +108,12 @@ class Gesture:
 
 		elif(what is "play"):			
 			self.genSpeech("Lets play")
-			time.sleep(2)
+			time.sleep(1)
 
 			#choose default one of the bahviors
 			self.naoMove = random.randint(0,2)
 			self.send_command(self.possBHVRS["doMove"][self.naoMove], what)            
-			time.sleep(3)
+			time.sleep(4)
 
 		elif(what is "win"): # NAO WON
 			randnr = random.randint(0,len(self.win)-1)	
