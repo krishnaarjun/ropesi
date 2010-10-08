@@ -126,9 +126,6 @@ class predictSign:
 		zaTime     = cv.GetTickCount() 
 		testImg    = self.preprocessImg(image, zaType)
 		prediction = problem.predict(testImg)
-
-		print prediction
-
 		zaTime     = cv.GetTickCount() - zaTime
 	    	totalTime += zaTime/(cv.GetTickFrequency()*1000.0)
 		if((what!="hands") or (prediction[0]==0 and what=="hands")):	
