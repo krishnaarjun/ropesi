@@ -36,6 +36,7 @@ if(choice == "d"):
 	goNao.naoBehaviors("demo")
 	goNao.releaseNao()
 elif(choice == "p"):
+	print "Please press 'q' to stop playing."
 	skin  = detectSkin()
 	goNao = Gesture(ipAdd, 9559)
 
@@ -46,40 +47,46 @@ elif(choice == "p"):
 		thread.start_new_thread(skin.findSkin, ())
 	except:
 		print "error for skin finder"
-		aLock.release()	
-	
-	#4) RESET THE VARIABLES 
-	aLock.release()	
-	aLock.acquire(1)		
-	try:
-		thread.start_new_thread(skin.reinitGame, ())
-	except:
-		print "error for skin init"
-		aLock.release()	
-	
-	#3) LET'S PLAY NOW___________________	
-	goNao.naoBehaviors("play")
-	moves = {0:"rock", 1:"paper", 2:"scissors"}
+		aLock.release()
 
-	print str(skin.maximum)+"["+str(skin.maxnr)+"] >>> vs >>> "+str(moves[int(goNao.naoMove)])
-	if(skin.maxnr >= 2 and skin.maximum != "none" and skin.maximum != "garb"):
-		if(skin.maximum == moves[int(goNao.naoMove)]): #0=rock, 1=paper, 2=scissors
-			goNao.naoBehaviors("draw")
-		elif(skin.maximum == "rock" and goNao.naoMove == 1): #rock>scissors>paper>rock
-			goNao.naoBehaviors("win")
-		elif(skin.maximum == "rock" and goNao.naoMove == 2):
-			goNao.naoBehaviors("loose")
-		elif(skin.maximum == "paper" and goNao.naoMove == 0):
-			goNao.naoBehaviors("loose")
-		elif(skin.maximum == "paper" and goNao.naoMove == 2):
-			goNao.naoBehaviors("win")
-		elif(skin.maximum == "scissors" and goNao.naoMove == 0):
-			goNao.naoBehaviors("win")
-		elif(skin.maximum == "scissors" and goNao.naoMove == 1):
-			goNao.naoBehaviors("loose")
+	key = ''
+	while(str(key) != 'q'):
+		#4) RESET THE VARIABLES 
+		aLock2 = thread.allocate_lock()
+		aLock2.acquire(1)
+		try:
+			#sleep while Nao&the player are shaking the hand and then start counting
+			sleep(5)
+			thread.start_new_thread(skin.reinitGame, ())
+		except:
+			print "error for skin finder"	
+		
+		#3) LET'S PLAY NOW___________________	
+		goNao.naoBehaviors("play")
+		moves = {0:"rock", 1:"paper", 2:"scissors"}
+
+		print str(skin.maximum)+"["+str(skin.maxnr)+"] >>> vs >>> "+str(moves[int(goNao.naoMove)])
+		if(skin.maxnr >= 2 and skin.maximum != "none" and skin.maximum != "garb"):
+			if(skin.maximum == moves[int(goNao.naoMove)]): #0=rock, 1=paper, 2=scissors
+				goNao.naoBehaviors("draw")
+			elif(skin.maximum == "rock" and goNao.naoMove == 1): #rock>scissors>paper>rock
+				goNao.naoBehaviors("win")
+			elif(skin.maximum == "rock" and goNao.naoMove == 2):
+				goNao.naoBehaviors("loose")
+			elif(skin.maximum == "paper" and goNao.naoMove == 0):
+				goNao.naoBehaviors("loose")
+			elif(skin.maximum == "paper" and goNao.naoMove == 2):
+				goNao.naoBehaviors("win")
+			elif(skin.maximum == "scissors" and goNao.naoMove == 0):
+				goNao.naoBehaviors("win")
+			elif(skin.maximum == "scissors" and goNao.naoMove == 1):
+				goNao.naoBehaviors("loose")
+		key = cv.WaitKey(0)	
+		aLock2.release()
 	# finally release the lock
 	aLock.release()				
 	goNao.releaseNao()
+		
 #______________________________________________________________________________
 
 

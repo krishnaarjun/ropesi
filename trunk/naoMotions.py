@@ -35,7 +35,7 @@ class Gesture:
 		self.possBHVRS    = {"handUp":"hand_up.xar", "demoRock":"demonstrate_rock.xar", "demoPaper":"demonstrate_paper.xar", \
 							"demoScissors":"demonstrate_scissors.xar", "handDown":"hand_down.xar", \
 							"doMove":["move_rock.xar","move_paper.xar","move_scissors.xar"]}
-		self.win          = ['hi hi hi I won', 'Ohhh yeah I am good', 'You lost nao rules', 'Yeah I am the rock paper scissors king', 'I won']
+		self.win          = ['hi hi hi I won', 'Ohhh yeah I am good', 'You lost', 'Yeah I am the rock paper scissors king', 'I won']
 		self.loose        = ['I lost', 'Hei you won cheater', 'It is not fair I lost', 'I guess I need to learn how to play'] 
 		self.draw         = ['It was a draw', 'Nobody won', 'It was a draw lets play again', 'Rematch?']
 		self.connectNao()
@@ -108,12 +108,13 @@ class Gesture:
 
 		elif(what is "play"):			
 			self.genSpeech("Let us play")
-			time.sleep(1)
+			time.sleep(2)
 
 			#choose default one of the bahviors
 			print "go count signs >>>"
 			self.naoMove = random.randint(0,2)
 			self.send_command(self.possBHVRS["doMove"][self.naoMove], what)            
+			time.sleep(3)
 
 		elif(what is "win"): # NAO WON
 			randnr = random.randint(0,len(self.win)-1)	
