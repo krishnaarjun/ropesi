@@ -38,7 +38,6 @@ if(choice == "d"):
 	goNao.releaseNao()
 
 elif(choice == "p"):
-	print "Please don't forget to press any key to stop gesture-detection."
 	skin  = detectSkin()
 	goNao = Gesture(ipAdd, 9559)
 
