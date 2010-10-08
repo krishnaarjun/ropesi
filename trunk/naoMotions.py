@@ -85,7 +85,6 @@ class Gesture:
 		self.frame.completeBehavior(gesture_id)
 
 	#____________________________________________________________
-
 	def naoBehaviors(self, what):
 		#print "NAO BAHVIORS CHOOSING ..."+str(what)
 		if(what is "demo"):
@@ -131,7 +130,10 @@ class Gesture:
 
 	# RELEASE THE JOINTS SO IT WON'T COMPLAIN
 	def releaseNao(self):
-		self.motion.stiffnessInterpolation("Body",0.0,self.stiffness)
-
+		try:
+			self.motion.stiffnessInterpolation("Body",0.0,self.stiffness)
+		except Exception, e:
+		    print "Error when making nao unstiff: "+str(e)
+		
 #____________________________________________________________
 
