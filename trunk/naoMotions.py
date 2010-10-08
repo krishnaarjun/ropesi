@@ -105,7 +105,7 @@ class Gesture:
 			time.sleep(1)
 
 			#MOVE HAND DOWN TO START PALYING
-			self.send_command(self.possBHVRS["handDown"], what) 
+			#self.send_command(self.possBHVRS["handDown"], what) 
 
 		elif(what is "play"):			
 			self.genSpeech("Let us play")
@@ -117,15 +117,15 @@ class Gesture:
 			self.send_command(self.possBHVRS["doMove"][self.naoMove], what)            
 
 		elif(what is "win"): # NAO WON
-			randnr = randint(0,len(self.win)-1)	
+			randnr = random.randint(0,len(self.win)-1)	
 			self.genSpeech(self.win[randnr])
 			time.sleep(1)
 		elif(what is "loose"): # NAO LOST
-			randnr = randint(0,len(self.loose)-1)	
+			randnr = random.randint(0,len(self.loose)-1)	
 			self.genSpeech(self.loose[randnr])
 			time.sleep(1)
 		elif(what is "draw"): # DRAW
-			randnr = randint(0,len(self.draw)-1)	
+			randnr = random.randint(0,len(self.draw)-1)	
 			self.genSpeech(self.draw[randnr])
 			time.sleep(1)
 
