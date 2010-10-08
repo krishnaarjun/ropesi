@@ -107,11 +107,10 @@ class Gesture:
 			#self.send_command(self.possBHVRS["handDown"], what) 
 
 		elif(what is "play"):			
-			self.genSpeech("Let us play")
+			self.genSpeech("Lets play")
 			time.sleep(2)
 
 			#choose default one of the bahviors
-			print "go count signs >>>"
 			self.naoMove = random.randint(0,2)
 			self.send_command(self.possBHVRS["doMove"][self.naoMove], what)            
 			time.sleep(3)

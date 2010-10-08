@@ -22,7 +22,8 @@ BASEPATH = "/home/nao/behaviors/"
 import cv
 from skinFinder import *
 from naoMotions import *
-import thread
+from threading import Thread
+import threading
 
 #_____________________________________________________________________
 #1) CONNECT TO NAO AND INITIALIZE CLASS SKIN
@@ -35,32 +36,34 @@ if(choice == "d"):
 	goNao = Gesture(ipAdd, 9559)
 	goNao.naoBehaviors("demo")
 	goNao.releaseNao()
+
 elif(choice == "p"):
-	print "Please press 'q' to stop playing."
+	print "Please don't forget to press any key to stop gesture-detection."
 	skin  = detectSkin()
 	goNao = Gesture(ipAdd, 9559)
 
 	#2) MAKE MULTI THREADS SO THE SKIN FINDER AND NAO INITIALIZE AND RUN IN PARALLEL	
-	aLock = thread.allocate_lock()
-	aLock.acquire(1)
+	skinLock = threading.Lock()
+	skinLock.acquire(1)
 	try:
-		thread.start_new_thread(skin.findSkin, ())
-	except:
+		skinThread = Thread(target=skin.findSkin, args = ())
+		skinThread.start()
+	except Exception,e:
 		print "error for skin finder"
-		aLock.release()
-
-	key = ''
-	while(str(key) != 'q'):
-		#4) RESET THE VARIABLES 
-		aLock2 = thread.allocate_lock()
-		aLock2.acquire(1)
+		skinLock.release()
+	skinLock.release()
+	
+	for i in range(0,3):
+		#4) RESET THE VARIABLES
+		skinLock.acquire(1)
 		try:
-			#sleep while Nao&the player are shaking the hand and then start counting
-			sleep(5)
-			thread.start_new_thread(skin.reinitGame, ())
-		except:
-			print "error for skin finder"	
-		
+			initThread = Thread(target=skin.reinitGame, args = ())
+			initThread.start()
+		except Exception,e:
+			skinLock.release()
+			print "error for reinitilising the counts"		
+		skinLock.release()
+
 		#3) LET'S PLAY NOW___________________	
 		goNao.naoBehaviors("play")
 		moves = {0:"rock", 1:"paper", 2:"scissors"}
@@ -81,12 +84,12 @@ elif(choice == "p"):
 				goNao.naoBehaviors("win")
 			elif(skin.maximum == "scissors" and goNao.naoMove == 1):
 				goNao.naoBehaviors("loose")
-		key = cv.WaitKey(0)	
-		aLock2.release()
-	# finally release the lock
-	aLock.release()				
+		initThread.join()
+		if(not skinThread.isAlive()):
+			break	
+	skinThread.join()	
 	goNao.releaseNao()
-		
+
 #______________________________________________________________________________
 
 
