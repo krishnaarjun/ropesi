@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+import time
 
 path = 'os.environ.get("AL_DIR")'
 home = 'os.environ.get("HOME")'
@@ -21,87 +22,110 @@ BASEPATH = "/home/nao/behaviors/"
 #____________________________________________________________
 
 class Gesture:
-	def __init__(self):
-		self.lastvalue = [0,0,0]
-		self.position  = "stand"
-		self.counter   = 0
-		self.naoMove   = 0
-		self.possBHVRS = {"demoRock":"demonstrate_rock.xar", "demoPaper":"demonstrate_paper.xar", "demoScissors":"demonstrate_scissors.xar", "rps":"move_rpsBeginGame.xar", "doMove":["move_rock.xar","move_paper.xar","move_scissors.xar"], "letsPlay":"letsPlay.xar", "nao_won":["iwon1.xar","iwon2.xar","iwon2.xar"], "nao_lost":["uwon1.xar","uwon2.xar","uwon3.xar"], "equal":["equal1.xar","equal2.xar"], "handUp":"startDemo.xar", "handDown":"prePlay.xar", "preSign":"preSign.xar", "job":"vanessa.xar"}
+	def __init__(self, host, port):
+		self.host         = host
+		self.port         = port
+		self.lastvalue    = [0,0,0]
+		self.counter      = 0
+		self.stiffness    = 1.0
+		self.naoMove      = 0
+		self.voice        = "Heather22Enhanced"
+		self.speechDevice = None
+		self.possBHVRS    = {"handUp":"hand_up.xar", "demoRock":"demonstrate_rock.xar", "demoPaper":"demonstrate_paper.xar", \
+							"demoScissors":"demonstrate_scissors.xar", "handDown":"hand_down.xar", \
+							"doMove":["move_rock.xar","move_paper.xar","move_scissors.xar"]}
+		self.win          = ['hi hi hi I won', 'Ohhh yeah I am good', 'You lost nao rules', 'Yeah I am the rock paper scissors king', 'I won']
+		self.loose        = ['I lost', 'Hei you won cheater', 'It is not fair I lost', 'I guess I need to learn how to play'] 
+		self.draw         = ['It was a draw', 'Nobody won', 'It was a draw lets play again', 'Rematch?']
 		self.connectNao()
-	#____________________________________________________________
-
+	#initialize all nao devices____________________________________________________________
 	def connectNao(self):
-#		print "CONNECT NAO"
-		host = "192.168.0.80"
-		port = 9559
-		self.frame = ALProxy("ALFrameManager", host, port)
-		self.motion = ALProxy("ALMotion", host, port)
-	#____________________________________________________________
-		
+		#FRAME MANAGER FOR CALLING BEHAVIORS
+		try:
+			self.frame  = ALProxy("ALFrameManager", self.host, self.port)
+		except Exception, e:
+		    print "Error when creating frame manager device proxy:"+str(e)
+		    exit(1)
+	
+
+		#MOTION DEVICE FOR MOVEMENTS
+		try:
+			self.motion = ALProxy("ALMotion", self.host, self.port)
+		except Exception, e:
+		    print "Error when creating motion device proxy:"+str(e)
+		    exit(1)
+		#MAKE NAO STIFF (OTHERWISE IT WON'T MOVE)
+		self.motionDevice.stiffnessInterpolation("Body",self.stiffness,1.0)
+
+
+		#CONNECT TO A SPEECH PROXY
+		try:
+		    self.speechDevice = ALProxy("ALTextToSpeech", self.host, self.port)
+		except Exception, e:
+		    print "Error when creating speech device proxy:"+str(e)
+		    exit(1)
+		try:
+			self.speechDevice.setVoice(self.voice)	
+		except Exception, e:
+		    print "Error when setting the voice and volume: "+str(e)
+
+	#SAY A SENTENCE___________________________________________________________________________________
+	def genSpeech(self, sentence):
+		try:
+			self.speechDevice.post.say(sentence)
+		except Exception, e:
+		    print "Error when saying a sentence: "+str(e)
+
+	#____________________________________________________________		
 	def send_command(self, doBehavior, what):
-#		print "SEND COMMAND (DOES THE MOVE)"	
 		gesture_path = BASEPATH + doBehavior
-		gesture_id = self.frame.newBehaviorFromFile(gesture_path, "")
-		self.motion.stiffnessInterpolation("Body", 1.0, 1.0)
+		gesture_id   = self.frame.newBehaviorFromFile(gesture_path, "")
 		self.frame.playBehavior(gesture_id)
-		#if(what != "demo"):
 		self.frame.completeBehavior(gesture_id)
 
-		self.after_effects("")
-	#____________________________________________________________
-
-	def after_effects(self, gesture):
-		if gesture is "standup":
-			self.position = "stand"
-		if gesture is "sitdown":
-			self.position = "sit"
 	#____________________________________________________________
 
 	def naoBehaviors(self, what):
-#		print "NAO BAHVIORS CHOOSING ..."+str(what)
+		#print "NAO BAHVIORS CHOOSING ..."+str(what)
 		if(what is "demo"):
-			doBehavior = self.possBHVRS["handUp"]
-			self.send_command(doBehavior, what)
+			#INITIALIZE POSITION OF THE HAND
+			self.send_command(self.possBHVRS["handUp"], what)
 			
-			doBehavior = self.possBHVRS["demoRock"]
-			self.send_command(doBehavior, what)
-			doBehavior = self.possBHVRS["demoPaper"]
-			self.send_command(doBehavior, what)
-			doBehavior = self.possBHVRS["demoScissors"]
-			self.send_command(doBehavior, what)					
+			self.genSpeech("This is how I do rock")			
+			self.send_command(self.possBHVRS["demoRock"], what)
+			time.sleep(1)
 
-			#go to default state
-			doBehavior = self.possBHVRS["handDown"]
-			self.send_command(doBehavior, what) 
+			self.genSpeech("This is how I do paper")		
+			self.send_command(self.possBHVRS["demoPaper"], what)
+			time.sleep(1)
+
+			self.genSpeech("This is how I do scissors")			
+			self.send_command(self.possBHVRS["demoScissors"], what)					
+			time.sleep(1)
+
+			#MOVE HAND DOWN TO START PALYING
+			self.send_command(self.possBHVRS["handDown"], what) 
+
 		elif(what is "play"):			
-			doBehavior = self.possBHVRS["letsPlay"]
-			self.send_command(doBehavior, what)
-			doBehavior = self.possBHVRS["rps"]
-			self.send_command(doBehavior, what)
-		elif(what is "move"):
-			#go to default state before move
+			self.genSpeech("Let us play")
+			time.sleep(1)
+
+			#choose default one of the bahviors
 			print "go count signs >>>"
 			self.naoMove = random.randint(0,2)
-			doBehavior   = self.possBHVRS["doMove"][self.naoMove]
-			self.send_command(doBehavior, what)            
-		elif(what is "lost"):
-			doBehavior = self.possBHVRS["nao_won"][random.randint(0,2)]
-			self.send_command(doBehavior, what)            
-		elif(what is "won"):
-			doBehavior = self.possBHVRS["nao_lost"][random.randint(0,2)]
-			self.send_command(doBehavior, what)            
-		elif(what is "equal"):
-			doBehavior = self.possBHVRS["equal"][random.randint(0,1)]
-			self.send_command(doBehavior, what) 
-		elif(what is "job"):
-			#go to default state
-			doBehavior = self.possBHVRS["handDown"]
-			self.send_command(doBehavior, what) 
+			self.send_command(self.possBHVRS["doMove"][self.naoMove], what)            
 
-			doBehavior = self.possBHVRS["job"]
-			self.send_command(doBehavior, what) 
-
+		elif(what is "win"): # NAO WON
+			randnr = randint(0,len(self.win)-1)	
+			self.genSpeech(self.win[randnr])
+			time.sleep(1)
+		elif(what is "loose"): # NAO LOST
+			randnr = randint(0,len(self.loose)-1)	
+			self.genSpeech(self.loose[randnr])
+			time.sleep(1)
+		elif(what is "draw"): # DRAW
+			randnr = randint(0,len(self.draw)-1)	
+			self.genSpeech(self.draw[randnr])
+			time.sleep(1)
 #____________________________________________________________
-
-#Gesture(True,False)
 
