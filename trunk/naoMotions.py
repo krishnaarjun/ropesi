@@ -128,5 +128,10 @@ class Gesture:
 			randnr = randint(0,len(self.draw)-1)	
 			self.genSpeech(self.draw[randnr])
 			time.sleep(1)
+
+	# RELEASE THE JOINTS SO IT WON'T COMPLAIN
+	def releaseNao(self):
+		self.motion.stiffnessInterpolation("Body",0.0,self.stiffness)
+
 #____________________________________________________________
 

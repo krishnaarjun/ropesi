@@ -34,6 +34,7 @@ choice = raw_input('your choice... ')
 if(choice == "d"):
 	goNao = Gesture(ipAdd, 9559)
 	goNao.naoBehaviors("demo")
+	goNao.releaseNao()
 elif(choice == "p"):
 	skin  = detectSkin()
 	goNao = Gesture(ipAdd, 9559)
@@ -46,7 +47,6 @@ elif(choice == "p"):
 	except:
 		print "error for skin finder"
 		aLock.release()	
-
 	
 	#4) RESET THE VARIABLES 
 	aLock.release()	
@@ -80,6 +80,7 @@ elif(choice == "p"):
 
 	# finally release the lock
 	aLock.release()				
+	goNao.releaseNao()
 #______________________________________________________________________________
 
 
