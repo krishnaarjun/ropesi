@@ -4,6 +4,7 @@ from PIL import *
 from hs_histogram import *
 import cProfile
 from predictSign import *
+import time
 
 class detectSkin:
 	def __init__(self):
@@ -20,7 +21,9 @@ class detectSkin:
    #__________________________________________________________
 
 	def reinitGame(self):
-#	print "REINIT IN SKIN DETECT"	
+		#print "REINIT IN SKIN DETECT"	
+		time.sleep(10)	
+		print 'reinitialising count'
 		self.predictions = {"rock":0, "paper":0, "scissors":0, "garb":0, "none":0}
 		self.maximum     = ""
 		self.maxnr       = 0	
@@ -45,7 +48,7 @@ class detectSkin:
 			while True:
 				frameCount+=1
 				
-				if frameCount%50==0 or frameCount==10:
+				if frameCount%20==0 or frameCount==10:
 					hasHist = False
 
 				t = cv.GetTickCount() #start timer
